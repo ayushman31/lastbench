@@ -36,3 +36,6 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+
+# OAuth credentials (just saved for my own reference, not necessary to create this file)
+oauth.json
