@@ -1,3 +1,3 @@
-export { authClient } from "./client";
-export { auth } from "./auth";
-export type { Session, User } from "./auth";
+export { authClient } from "./client.js";
+export { auth } from "./auth.js";
+export type { Session, User } from "./auth.js";
