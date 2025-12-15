@@ -1,14 +1,22 @@
 // apps/api/src/index.ts (or wherever your main Express/Fastify app is)
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
-import { auth } from "@repo/auth";
+import { auth } from "@repo/auth/server";
+import cors from "cors";
 
 const app = express();
 
-// Better Auth automatically handles all OAuth routes
+app.use(express.json());
+
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}));
+
+// better-auth automatically handles all OAuth routes
 app.all("/api/auth", toNodeHandler(auth));
 
-// Your other API routes
+// other API routes
 app.get("/api/projects", async (req, res) => {
   // Access session in your routes
   const session = await auth.api.getSession({ headers: req.headers as HeadersInit });
@@ -17,7 +25,7 @@ app.get("/api/projects", async (req, res) => {
     return res.status(401).json({ error: "Unauthorized" });
   }
   
-  // Your logic here
+  // logic here
   res.json({ user: session.user });
 });
 
