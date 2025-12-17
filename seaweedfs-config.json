@@ -1,0 +1,19 @@
+{
+    "identities": [
+      {
+        "name": "lastbench",
+        "credentials": [
+          {
+            "accessKey": "seaweedfs_access_key",
+            "secretKey": "seaweedfs_secret_key"
+          }
+        ],
+        "actions": [
+          "Admin",
+          "Read",
+          "Write"
+        ]
+      }
+    ]
+  }
+  

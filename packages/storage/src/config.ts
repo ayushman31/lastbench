@@ -1,5 +1,5 @@
 export interface StorageConfig {
-    provider: "s3" | "r2" | "garage";
+    provider: "s3" | "r2" | "seaweedfs";
     region: string;
     bucket: string;
     accessKeyId: string;
@@ -10,7 +10,7 @@ export interface StorageConfig {
 }
 
 export function getStorageConfig(): StorageConfig {
-    const provider = (process.env.STORAGE_PROVIDER || "garage") as StorageConfig["provider"];
+    const provider = (process.env.STORAGE_PROVIDER || "seaweedfs") as StorageConfig["provider"];
 
     const baseConfig = {
         provider,
@@ -20,13 +20,13 @@ export function getStorageConfig(): StorageConfig {
     };
 
     switch (provider) {
-        case "garage":
+        case "seaweedfs":
             return {
                 ...baseConfig,
-                region: "garage",
-                endpoint: process.env.STORAGE_ENDPOINT || 'http://localhost:3900',
-                publicUrl: process.env.STORAGE_PUBLIC_URL || 'http://localhost:3900',
-                forcePathStyle: true, // required for garage
+                region: "us-east-1",
+                endpoint: process.env.STORAGE_ENDPOINT || 'http://localhost:8333',
+                publicUrl: process.env.STORAGE_PUBLIC_URL || 'http://localhost:8333',
+                forcePathStyle: true, // required for seaweedfs
             };
 
         case "s3":
