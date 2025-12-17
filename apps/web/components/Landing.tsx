@@ -28,7 +28,8 @@ const Landing = () => {
                     className="object-cover"
                     style={{
                       clipPath: "inset(0 50% 0 0)",
-                      scale: "0.65",
+                      transform: "scale(0.70)",
+                      transformOrigin: "left bottom",
                       objectPosition: "left bottom",
                     }}
                   />
@@ -43,12 +44,13 @@ const Landing = () => {
                     className="object-cover"
                     style={{
                       clipPath: "inset(0 0 0 50%)",
-                      scale: "0.65",
+                      transform: "scale(0.70)",
+                      transformOrigin: "right bottom",
                       objectPosition: "right bottom",
                     }}
                   />
                 </div>
-</div>
+            </div>
 
 
         </div>
