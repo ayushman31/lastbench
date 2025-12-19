@@ -11,7 +11,7 @@ const Header = () => {
         <div className="flex justify-between">
             <div className="flex gap-4 items-center justify-center">
                 <Image src={"logo.svg"} alt="logo" width={48} height={48} />
-                <div className={`${playfair.className} text-[32px]`}>
+                <div className={`${aperture.className} text-[32px] mt-3`}>
                     <ShinyText text="LastBench" speed={3} className="font-black"/>
                 </div>
             </div>

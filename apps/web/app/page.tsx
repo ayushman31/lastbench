@@ -1,11 +1,12 @@
 import Header from "@/components/Header";
 import Landing from "@/components/Landing";
+import LightRays from "@/components/LightRays";
 
 export default function Home() {
   return (
     <div className="min-h-screen w-full bg-[#121212] relative text-white">
   {/* Complex Multiplier Pattern (Enhanced) */}
-  <div
+  {/* <div
     className="absolute inset-0 z-0 pointer-events-none"
     style={{
       backgroundImage: `
@@ -18,7 +19,22 @@ export default function Home() {
       backgroundSize: "80px 80px, 40px 40px, 60px 60px, 80px 80px, 100% 100%",
       backgroundPosition: "0 0, 0 0, 0 0, 40px 40px, center"
     }}
+  /> */}
+
+<div style={{ width: '100%', height: '100%', position: 'absolute' }}>
+  <LightRays
+    raysOrigin="top-center"
+    raysColor="#006239"
+    raysSpeed={0.6}
+    lightSpread={0.1}
+    rayLength={3}
+    followMouse={false}
+    mouseInfluence={0.1}
+    noiseAmount={0}
+    distortion={0}
+    className="custom-rays"
   />
+</div>
    <div className="relative p-4 flex flex-col min-h-screen">
     {/* <Button className="bg-primary text-primary-foreground">dsdsad</Button>
     <Image src="/logo.svg" alt="logo " width={100} height={100} /> */}
