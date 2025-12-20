@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Playfair_Display  } from 'next/font/google';
 import localFont from 'next/font/local';
-import  { ShinyText, Tabs }  from "@repo/ui";
+import  { ShinyText, Tabs, Button }  from "@repo/ui";
 
 const aperture = localFont({src: '../public/fonts/aperture2.0-webfont.woff2'});
 
@@ -21,8 +21,8 @@ const Header = () => {
                 <Tabs className={`${aperture.className} text-[18px] gap-4`} />
             </div>
 
-            <div className={`flex items-center justify-center text-[18px] ${aperture.className} p-4 pr-10 z-10  cursor-pointer gap-4`}>
-                Signup
+            <div className={`flex items-center justify-center text-[18px] ${aperture.className} p-4 pr-10 z-10 gap-4`}>
+                <Button className="cursor-pointer font-black" variant="default" size="lg">Sign Up</Button>
             </div>
         </div>
     );
