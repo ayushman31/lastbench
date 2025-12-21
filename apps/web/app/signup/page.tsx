@@ -1,9 +1,9 @@
-// apps/web/app/login/page.tsx
 "use client";
 
 import { authClient } from "@repo/auth/client";
+import Header from "@/components/Header";
 
-export default function LoginPage() {
+export default function SignupPage() {
   const handleGoogleLogin = async () => {
     await authClient.signIn.social({
       provider: "google",
@@ -21,6 +21,7 @@ export default function LoginPage() {
 
   return (
     <div>
+      <Header />
       <button onClick={handleGoogleLogin}>Login with Google</button>
       {/* Email/password form */}
       <input type="email" placeholder="Email" />
