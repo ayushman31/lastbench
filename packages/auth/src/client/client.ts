@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { createAuthClient } from "better-auth/client";
 
 export const authClient = createAuthClient({

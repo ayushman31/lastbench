@@ -1,3 +1,5 @@
+import dotenv from "dotenv";
+dotenv.config();
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
@@ -6,6 +8,8 @@ const globalForPrisma = globalThis as unknown as {
 }
 
 const adapter = new PrismaPg({connectionString : process.env.DATABASE_URL!})
+console.log("DB URL present:", !!process.env.DATABASE_URL);
+console.log("DB URL value:", process.env.DATABASE_URL);
 
 export const prisma =
   globalForPrisma.prisma ??

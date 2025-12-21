@@ -1,4 +1,6 @@
 // apps/api/src/index.ts (or wherever your main Express/Fastify app is)
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "@repo/auth/server";
@@ -14,7 +16,7 @@ app.use(cors({
 }));
 
 // better-auth automatically handles all OAuth routes
-app.all("/api/auth", toNodeHandler(auth));
+app.use("/api/auth", toNodeHandler(auth));
 
 // other API routes
 app.get("/api/projects", async (req, res) => {
@@ -28,6 +30,11 @@ app.get("/api/projects", async (req, res) => {
   // logic here
   res.json({ user: session.user });
 });
+
+// temporary logging to check if the environment variables are set
+console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'Set' : 'Missing');
+console.log('GOOGLE_CLIENT_SECRET:', process.env.GOOGLE_CLIENT_SECRET ? 'Set' : 'Missing');
+console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Missing');
 
 app.listen(4000, () => {
   console.log("API server running on http://localhost:4000");

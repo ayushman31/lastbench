@@ -1,15 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "postgres"
 }
 
 model User {
@@ -17,115 +11,108 @@ model User {
   email         String    @unique
   name          String?
   avatar        String?
-  image         String?               // added for Better-Auth sometimes expects `image`
-  emailVerified DateTime?              
+  emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-
+  image         String?
   accounts      Account[]
-  sessions      Session[]
   projects      Project[]
+  sessions      Session[]
+
+  @@map("User")
 }
 
-
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  // optional fields better-auth might expect
-    accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
+  id                    String    @id @default(cuid())
+  userId                String
+  type                  String
+  provider              String
+  providerAccountId     String
+  refresh_token         String?
+  access_token          String?
+  expires_at            Int?
+  token_type            String?
+  scope                 String?
+  id_token              String?
+  session_state         String?
+  accessTokenExpiresAt  DateTime?
+  createdAt             DateTime  @default(now())
   password              String?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  refreshTokenExpiresAt DateTime?
+  updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
+  @@map("Account")
 }
-
 
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-
-  // audit and metadata fields from Better-Auth template
   createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
   ipAddress    String?
+  updatedAt    DateTime @updatedAt
   userAgent    String?
-
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@map("Session")
 }
 
-
-model VerificationToken {
+model Verification {
+  id         String   @id @default(cuid())
   identifier String
-  token      String   @unique
-  expires    DateTime
-
-  // add createdAt/updatedAt fields from Better-Auth template
+  value      String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+  expiresAt  DateTime
 
-  @@unique([identifier, token])
+  @@unique([identifier, value])
+  @@map("Verification")
 }
 
-
 model Project {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   name        String
   description String?
   userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  recordings Recording[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recordings  Recording[]
 
   @@index([userId])
+  @@map("Project")
 }
 
 model Recording {
-  id          String   @id @default(cuid())
-  projectId   String
-  title       String
-  duration    Int?
-  status      String   @default("processing")
-  storageUrl  String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tracks    Track[]
+  id         String   @id @default(cuid())
+  projectId  String
+  title      String
+  duration   Int?
+  status     String   @default("processing")
+  storageUrl String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tracks     Track[]
 
   @@index([projectId])
+  @@map("Recording")
 }
 
 model Track {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   recordingId String
   userId      String?
   trackUrl    String
   trackType   String
-  createdAt   DateTime @default(now())
-
-  recording Recording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  recording   Recording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
 
   @@index([recordingId])
+  @@map("Track")
 }
