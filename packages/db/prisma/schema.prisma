@@ -11,7 +11,7 @@ model User {
   email         String    @unique
   name          String?
   avatar        String?
-  emailVerified DateTime?
+  emailVerified Boolean   @default(false)
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
   image         String?
@@ -24,16 +24,17 @@ model User {
 
 model Account {
   id                    String    @id @default(cuid())
+  accountId             String    @unique   // used for better-auth
   userId                String
-  type                  String
-  provider              String
-  providerAccountId     String
-  refresh_token         String?
-  access_token          String?
+  type                  String?
+  providerId              String
+  providerAccountId     String?  // TODO:we have to find a way to get this
+  refreshToken         String?
+  accessToken          String?
   expires_at            Int?
   token_type            String?
   scope                 String?
-  id_token              String?
+  idToken              String?
   session_state         String?
   accessTokenExpiresAt  DateTime?
   createdAt             DateTime  @default(now())
@@ -42,16 +43,16 @@ model Account {
   updatedAt             DateTime  @updatedAt
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([provider, providerAccountId])
+  @@unique([providerId, providerAccountId])
   @@index([userId])
   @@map("Account")
 }
 
 model Session {
   id           String   @id @default(cuid())
-  sessionToken String   @unique
+  token String   @unique
   userId       String
-  expires      DateTime
+  expiresAt      DateTime
   createdAt    DateTime @default(now())
   ipAddress    String?
   updatedAt    DateTime @updatedAt
