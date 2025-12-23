@@ -10,9 +10,19 @@ export const auth = betterAuth({
         provider: "postgresql",
     }),
 
+    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000",
+
     emailAndPassword: {
         enabled: true,
         requireEmailVerification: false,  //enable later for production
+        passwordPolicy: {
+            minLength: 8,
+            maxLength: 20,
+            requireUppercase: true,
+            requireLowercase: true,
+            requireNumber: true,
+            requireSpecialChar: true,
+        },
     },
 
     socialProviders: {
@@ -20,6 +30,7 @@ export const auth = betterAuth({
             enabled: true,
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+            redirectURI: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth/callback/google`,
         },
 
     },
@@ -32,11 +43,22 @@ export const auth = betterAuth({
             maxAge: 5 * 60 , // 5 minutes
         },
     },
+
+    // to make cookies work across subdomains
+    advanced: {
+        cookiePrefix: "lastbench",
+        useSecureCookies: process.env.NODE_ENV === "production",
+        crossSubDomainCookies: {
+            enabled: true,
+            domain: process.env.NODE_ENV === "production" ? ".lastbench.com" : "localhost",
+        }
+    },
     
     trustedOrigins: [
         "http://localhost:3000",  //apps/web
         "http://localhost:3001",  //apps/studio
         "http://localhost:3002",  //apps/editor
+        "http://localhost:4000",  //api
     ],
         
 });
