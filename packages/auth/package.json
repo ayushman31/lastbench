@@ -11,6 +11,10 @@
     "./server": {
       "import": "./dist/server/auth.js",
       "types": "./dist/server/auth.d.ts"
+    },
+    "./middleware": {
+      "import": "./dist/middleware/middleware.js",
+      "types": "./dist/middleware/middleware.d.ts"
     }
   },
   "scripts": {
@@ -27,6 +31,10 @@
     "@better-auth/cli": "^1.4.5",
     "@repo/db": "workspace:*",
     "@repo/typescript-config": "workspace:*",
-    "@types/node": "^24.10.1"
+    "@types/node": "^24.10.1",
+    "next": "^16.0.1"
+  },
+  "peerDependencies": {
+    "next": "^16.0.1"
   }
 }
