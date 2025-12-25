@@ -18,7 +18,7 @@ export default function SignupPage() {
       
       await authClient.signIn.social({
         provider: "google",
-        callbackURL: "http://localhost:3001", // Redirect to Studio
+        callbackURL: "http://localhost:3001", // Redirect to Studio        
       });
     } catch (err: any) {
       setError(err.message || "Failed to sign in with Google");

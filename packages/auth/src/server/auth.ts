@@ -10,7 +10,7 @@ export const auth = betterAuth({
         provider: "postgresql",
     }),
 
-    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:4000",
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:4000",
 
     emailAndPassword: {
         enabled: true,
@@ -30,7 +30,7 @@ export const auth = betterAuth({
             enabled: true,
             clientId: process.env.GOOGLE_CLIENT_ID!,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            redirectURI: `${process.env.NEXT_PUBLIC_BETTER_AUTH_URL}/api/auth/callback/google`,
+            redirectURI: `${process.env.BETTER_AUTH_URL}/api/auth/callback/google`,
         },
 
     },
