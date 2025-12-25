@@ -138,7 +138,7 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+            className="w-full bg-primary text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50"
           >
             {loading ? "Loading..." : "Sign Up"}
           </button>

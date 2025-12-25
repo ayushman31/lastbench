@@ -1,10 +1,13 @@
+"use client";
 import localFont from 'next/font/local';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { GetStartedButton } from './ui/button';
 
 const aperture = localFont({src: '../public/fonts/aperture2.0-webfont.woff2'});
 
 const Landing = () => {
-
+    const router = useRouter();
     return (
         <div className='items-center justify-center'>
             <div className='text-center'>    
@@ -15,6 +18,11 @@ const Landing = () => {
                 <p className={`${aperture.className} text-2xl mt-15`} >Lastbench is a podcasting platform, where you <br/>
                     can record premium quality content. <br />
                     Anytime, Anywhere, Any device.  </p>
+            </div>
+
+            <div className={`flex items-center justify-center text-[18px] ${aperture.className} p-4 pr-10 z-10 gap-4 mt-10`}>
+                <GetStartedButton className="cursor-pointer z-20" 
+                onClick={() => router.push("/signup")}>Get Started</GetStartedButton>
             </div>
 
             {/* Left half - crops to show only left 50% */}
