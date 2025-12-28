@@ -4,13 +4,9 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
 
   const cookieHeader = request.headers.get('cookie');
-  console.log("🔴🔴🔴🔴🔴🔴🔴🔴🔴");
-  console.log(cookieHeader);
 
   // check if session cookie is present
   const hasSessionCookie = cookieHeader?.includes('lastbench.session_token');
-  console.log("🔴🔴🔴🔴🔴🔴🔴🔴🔴");
-  console.log(hasSessionCookie);
 
   if (!hasSessionCookie) {
     // redirect to web if not authenticated
@@ -25,8 +21,6 @@ export async function middleware(request: NextRequest) {
       },
       credentials: 'include',
     });
-    console.log("🔴🔴🔴🔴🔴🔴🔴🔴🔴");
-    console.log(sessionResponse);
     if (!sessionResponse.ok) {
       const url = new URL('http://localhost:3000/signup');
       // return URL so user can come back after login
