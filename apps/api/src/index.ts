@@ -19,9 +19,6 @@ app.use(cors({
   credentials: true,
 }));
 
-// better-auth automatically handles all OAuth routes
-app.use("/api/auth", toNodeHandler(auth));
-
 //custom redirect handler after successful auth
 app.get("/api/auth/success", async (req, res) => {
   res.redirect("http://localhost:3001");
@@ -42,6 +39,11 @@ app.get("/api/auth/session", async (req, res) => {
     return res.status(500).json({ error: "Internal server error" });
   }
 });
+
+
+// better-auth automatically handles all OAuth routes
+app.use("/api/auth", toNodeHandler(auth));
+
 
 // other API routes
 app.get("/api/projects", async (req, res) => {
