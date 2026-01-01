@@ -1,14 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  User, 
-  Settings, 
-  Shield, 
-  LogOut, 
-  CreditCard,
-} from 'lucide-react';
 import { MenuItem } from './MenuItem';
+import GearIcon from './icons/settings';
+import CreditCard from './icons/credit';
+import ShieldCheck from './icons/security';
+import UserCheckIcon from './icons/user';
+import LogoutIcon from './icons/logout';
 
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -101,15 +99,15 @@ const Menu = () => {
                   <div className="h-px w-full bg-border my-2" />
 
                   <div className="space-y-0.5">
-                    <MenuItem icon={<User size={18} />} label="Personal info" />
-                    <MenuItem icon={<Shield size={18} />} label="Account Security" />
-                    <MenuItem icon={<CreditCard size={18} />} label="Manage Subscription" />
-                    <MenuItem icon={<Settings size={18} />} label="Settings" />
+                    <MenuItem icon={<UserCheckIcon hovered={false} size={18} />} label="Personal info" />
+                    <MenuItem icon={<ShieldCheck hovered={false} size={18} />} label="Account Security" />
+                    <MenuItem icon={<CreditCard hovered={false} size={18} />} label="Manage Subscription" />
+                    <MenuItem icon={<GearIcon hovered={false} size={18} />} label="Settings" />
                   </div>
 
                   <div className="h-px bg-neutral-800 my-2 mx-1" />
 
-                  <MenuItem icon={<LogOut size={18} />} label="Logout" isDanger={false} />
+                  <MenuItem icon={<LogoutIcon hovered={false} size={18} />} label="Logout" isDanger={false} />
                   
                 </div>
               </motion.div>
