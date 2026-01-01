@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { Inter } from "next/font/google";
 import SidebarItem from "./SidebarItem";
-import { FolderKanban, LayoutDashboard, Podcast, PartyPopper, UserRoundPlus, Wrench } from "lucide-react";
+import { FolderKanban, LayoutDashboard, Podcast, PartyPopper, UserRoundPlus, Wrench, Rocket } from "lucide-react";
 
 const inter = Inter({ subsets: ['latin'] });
 export const Sidebar = () => {
@@ -26,6 +26,7 @@ export const Sidebar = () => {
   
           {/* Bottom nav */}
           <ul className="flex flex-col gap-1">
+            <SidebarItem href="/upgrade" label="Upgrade" icon={Rocket} />
             <SidebarItem href="/whats-new" label="What's New" icon={PartyPopper} />
             <SidebarItem href="/settings" label="Settings" icon={Wrench} />
           </ul>

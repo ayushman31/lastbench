@@ -1,7 +1,7 @@
 import { auth } from "@repo/auth/server";
 import { headers } from "next/headers";
 import { Sidebar } from "../components/Sidebar";
-import ActionSearchBar from "../components/ActionSearchBar";
+import { Header } from "../components/Header";
 
 export default async function Home() {
   const session = await auth.api.getSession({
@@ -9,8 +9,14 @@ export default async function Home() {
   });
   return (
     <div className="flex">
-      <Sidebar />
-      <ActionSearchBar />
+      <div className="py-4">
+        <Sidebar />
+      </div>
+
+      <div className="w-full p-4">
+        <Header />  
+      </div>
+      
     </div>
   );
 }
