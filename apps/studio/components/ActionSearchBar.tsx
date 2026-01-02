@@ -14,6 +14,7 @@ import {
   Clapperboard,
 } from "lucide-react";
 import useDebounce from "@/hooks/useDebounce";
+import { ClapIcon } from "./icons/clapper";
 
 interface Action {
   id: string;
@@ -67,7 +68,7 @@ const allActionsSample: Action[] = [
   {
     id: "1",
     label: "Recording 1",
-    icon: <Clapperboard className="h-4 w-4 " />,
+    icon: <ClapIcon className="h-4 w-4 " />,
     description: "Recording 1",
     short: "⌘K",
     end: "Agent",
@@ -75,7 +76,7 @@ const allActionsSample: Action[] = [
   {
     id: "2",
     label: "Recording 2",
-    icon: <Clapperboard className="h-4 w-4" />,
+    icon: <ClapIcon className="h-4 w-4" />,
     description: "Recording 2",
     short: "⌘P",
     end: "Command",
@@ -83,21 +84,21 @@ const allActionsSample: Action[] = [
   {
     id: "3",
     label: "Recording 3",
-    icon: <Clapperboard className="h-4 w-4" />,
+    icon: <ClapIcon className="h-4 w-4" />,
     description: "Recording 3",
     end: "Application",
   },
   {
     id: "4",
     label: "Recording 4",
-    icon: <Clapperboard className="h-4 w-4" />,
+    icon: <ClapIcon className="h-4 w-4" />,
     description: "Recording 4",
     end: "Active",
   },
   {
     id: "5",
     label: "Recording 5",
-    icon: <Clapperboard className="h-4 w-4" />,
+    icon: <ClapIcon className="h-4 w-4" />,
     description: "Recording 5",
     end: "Link",
   },

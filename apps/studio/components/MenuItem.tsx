@@ -1,11 +1,12 @@
 import { useState } from "react";
 import React from "react";
 
-const MenuItem = ({ icon, label, isDanger = false }: { icon: React.ReactNode; label: string; isDanger?: boolean }) => {
+const MenuItem = ({ icon, label, isDanger = false, onClick }: { icon: React.ReactNode; label: string; isDanger?: boolean; onClick?: () => void }) => {
   const [hovered, setHovered] = useState(false);
 
   return (
     <button
+      onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group cursor-pointer

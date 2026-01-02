@@ -1,12 +1,8 @@
-import { auth } from "@repo/auth/server";
-import { headers } from "next/headers";
 import { Sidebar } from "../components/Sidebar";
 import { Header } from "../components/Header";
+import Dashboard from "../components/dashboard/Dashboard";
 
 export default async function Home() {
-  const session = await auth.api.getSession({
-    headers: await headers(),
-  });
   return (
     <div className="flex">
       <div className="py-4">
@@ -14,7 +10,8 @@ export default async function Home() {
       </div>
 
       <div className="w-full p-4">
-        <Header />  
+        <Header /> 
+        <Dashboard />
       </div>
       
     </div>

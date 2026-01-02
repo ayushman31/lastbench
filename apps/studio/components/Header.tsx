@@ -8,9 +8,9 @@ export const Header = () => {
                 <p>Dashboard</p>
             </div>
 
-            <div>
+            {/* <div>
                 <ActionSearchBar />
-            </div>
+            </div> */}
 
             <div>
                 <Menu />
