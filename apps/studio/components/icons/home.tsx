@@ -4,39 +4,33 @@ import { motion, useAnimate } from "motion/react";
 import { useEffect } from "react";
 import { AnimatedIconProps } from "./iconTypes";
 
-const UserCheckIcon = ({
+const HomeIcon = ({
   size = 24,
   color = "currentColor",
   strokeWidth = 2,
   className = "",
-  hovered = false,
+  hovered,
 }: AnimatedIconProps) => {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {
     if (hovered) {
       animate(
-        ".user-avatar",
-        { scale: 1.05, y: -1 },
-        { duration: 0.25, ease: "easeOut" }
-      );
-
-      animate(
-        ".check-mark",
-        { pathLength: [0, 1], scale: 1.1 },
+        ".roof",
+        { y: [-2, 0], opacity: [0.6, 1] },
         { duration: 0.4, ease: "easeOut" }
       );
-    } else {
+
       animate(
-        ".user-avatar",
-        { scale: 1, y: 0 },
-        { duration: 0.2, ease: "easeInOut" }
+        ".house",
+        { scale: [0.95, 1] },
+        { duration: 0.3, ease: "easeOut" }
       );
 
       animate(
-        ".check-mark",
-        { pathLength: 1, scale: 1 },
-        { duration: 0.25, ease: "easeInOut" }
+        ".door",
+        { scaleY: [0, 1] },
+        { duration: 0.3, ease: "easeOut" }
       );
     }
   }, [hovered, animate]);
@@ -56,20 +50,19 @@ const UserCheckIcon = ({
       className={`inline-flex ${className}`}
     >
       <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-
-      <motion.g className="user-avatar" style={{ transformOrigin: "50% 50%" }}>
-        <path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" />
-        <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
-      </motion.g>
-
+      <motion.path className="roof" d="M5 12l-2 0l9 -9l9 9l-2 0" />
       <motion.path
-        d="M15 19l2 2l4 -4"
-        className="check-mark"
-        style={{ transformOrigin: "18px 19px" }}
-        initial={{ pathLength: 1 }}
+        className="house"
+        style={{ transformOrigin: "center" }}
+        d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7"
+      />
+      <motion.path
+        className="door"
+        style={{ transformOrigin: "center bottom" }}
+        d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6"
       />
     </motion.svg>
   );
 };
 
-export default UserCheckIcon;
+export default HomeIcon;

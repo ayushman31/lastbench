@@ -2,16 +2,7 @@
 
 import { motion, useAnimate } from "motion/react";
 import { useEffect } from "react";
-
-type AnimatedIconProps = {
-  hovered: boolean;
-  size: number;
-  color?: string;
-  strokeWidth?: number;
-  className?: string;
-};
-
-type LogoutIconProps = AnimatedIconProps & { hovered?: boolean };
+import { AnimatedIconProps } from "./iconTypes";
 
 const LogoutIcon = ({
   size = 24,
@@ -19,7 +10,7 @@ const LogoutIcon = ({
   strokeWidth = 2,
   className = "",
   hovered = false,
-}: LogoutIconProps) => {
+}: AnimatedIconProps) => {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {

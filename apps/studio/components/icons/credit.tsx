@@ -1,15 +1,6 @@
 import { motion, useAnimate } from "motion/react";
 import { useEffect } from "react";
-
-type AnimatedIconProps = {
-  hovered: boolean;
-  size: number;
-  color?: string;
-  strokeWidth?: number;
-  className?: string;
-};
-
-type CreditCardProps = AnimatedIconProps & { hovered?: boolean };
+import { AnimatedIconProps } from "./iconTypes";
 
 const CreditCard = ({
   size = 24,
@@ -17,7 +8,7 @@ const CreditCard = ({
   strokeWidth = 2,
   className = "",
   hovered = false,
-}: CreditCardProps) => {
+}: AnimatedIconProps) => {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {

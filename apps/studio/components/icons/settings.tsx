@@ -1,13 +1,7 @@
+"use client";
 import { motion, useAnimate } from "motion/react";
 import { useEffect } from "react";
-
-type AnimatedIconProps = {
-  hovered: boolean;
-  size: number;
-  color?: string;
-  strokeWidth?: number;
-  className?: string;
-};
+import { AnimatedIconProps } from "./iconTypes";
 
 const GearIcon = ({
   hovered,

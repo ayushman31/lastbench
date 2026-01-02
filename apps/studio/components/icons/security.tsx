@@ -1,15 +1,7 @@
 import { motion, useAnimate } from "motion/react";
 import { useEffect } from "react";
+import { AnimatedIconProps } from "./iconTypes";
 
-type AnimatedIconProps = {
-  hovered: boolean;
-  size: number;
-  color?: string;
-  strokeWidth?: number;
-  className?: string;
-};
-
-type ShieldCheckProps = AnimatedIconProps & { hovered?: boolean };
 
 const ShieldCheck = ({
   size = 24,
@@ -17,7 +9,7 @@ const ShieldCheck = ({
   strokeWidth = 2,
   className = "",
   hovered = false,
-}: ShieldCheckProps) => {
+}: AnimatedIconProps) => {
   const [scope, animate] = useAnimate();
 
   useEffect(() => {

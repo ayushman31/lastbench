@@ -4,7 +4,7 @@ import { motion, useAnimate } from "motion/react";
 import { useEffect } from "react";
 import { AnimatedIconProps } from "./iconTypes";
 
-const UserCheckIcon = ({
+const UserPlusIcon = ({
   size = 24,
   color = "currentColor",
   strokeWidth = 2,
@@ -22,9 +22,9 @@ const UserCheckIcon = ({
       );
 
       animate(
-        ".check-mark",
-        { pathLength: [0, 1], scale: 1.1 },
-        { duration: 0.4, ease: "easeOut" }
+        ".plus-sign",
+        { scale: 1.15, rotate: 90 },
+        { duration: 0.3, ease: "easeOut" }
       );
     } else {
       animate(
@@ -34,8 +34,8 @@ const UserCheckIcon = ({
       );
 
       animate(
-        ".check-mark",
-        { pathLength: 1, scale: 1 },
+        ".plus-sign",
+        { scale: 1, rotate: 0 },
         { duration: 0.25, ease: "easeInOut" }
       );
     }
@@ -62,14 +62,12 @@ const UserCheckIcon = ({
         <path d="M6 21v-2a4 4 0 0 1 4 -4h4" />
       </motion.g>
 
-      <motion.path
-        d="M15 19l2 2l4 -4"
-        className="check-mark"
-        style={{ transformOrigin: "18px 19px" }}
-        initial={{ pathLength: 1 }}
-      />
+      <motion.g className="plus-sign" style={{ transformOrigin: "19px 19px" }}>
+        <path d="M16 19h6" />
+        <path d="M19 16v6" />
+      </motion.g>
     </motion.svg>
   );
 };
 
-export default UserCheckIcon;
+export default UserPlusIcon;
