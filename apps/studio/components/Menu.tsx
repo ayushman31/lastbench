@@ -7,10 +7,13 @@ import CreditCard from './icons/credit';
 import ShieldCheck from './icons/security';
 import UserCheckIcon from './icons/user';
 import LogoutIcon from './icons/logout';
+import { authClient, useSession } from '@repo/auth/client';
 
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const { session, loading, user } = useSession();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -23,6 +26,10 @@ const Menu = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  if(!user) return null;
+
+  const userName = user.name || user.email;
+
   return (
     <div className="flex justify-center p-4 text-neutral-200">
       <div className="w-full flex justify-end items-start gap-4">
@@ -33,8 +40,8 @@ const Menu = () => {
             className="relative w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-neutral-600 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
           >
             <img 
-              src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-              alt="User"
+              src={user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email)}`}
+              alt={user.name || "User"}
               className="w-full h-full object-cover"
             />
           </button>
@@ -54,14 +61,14 @@ const Menu = () => {
                   <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer group">
                     <div className="w-10 h-10 rounded-full overflow-hidden">
                       <img 
-                        src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80" 
-                        alt="User"
+                        src={user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email)}`}
+                        alt={user.name || "User"}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div className="flex flex-col">
-                      <span className="text-sm font-semibold text-white">@user</span>
-                      <span className="text-xs text-neutral-400">Personal</span>
+                      <span className="text-sm font-semibold text-white">{userName}</span>
+                      <span className="text-xs text-neutral-400">{user.email}</span>
                     </div>
                   </div>
 
@@ -107,7 +114,7 @@ const Menu = () => {
 
                   <div className="h-px bg-neutral-800 my-2 mx-1" />
 
-                  <MenuItem icon={<LogoutIcon hovered={false} size={18} />} label="Logout" isDanger={false} />
+                  <MenuItem icon={<LogoutIcon hovered={false} size={18} />} label="Logout" isDanger={false} onClick={() => {authClient.signOut(); window.location.href = "http://localhost:3000"}} />
                   
                 </div>
               </motion.div>
