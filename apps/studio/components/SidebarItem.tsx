@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import React, { useState } from "react";
+import { motion, Variants } from "motion/react";
 
 type SidebarItemProps = {
   href: string;
@@ -9,6 +10,7 @@ type SidebarItemProps = {
   label: string;
   className?: string;
   iconClassName?: string;
+  variants?: Variants;
 };
 
 export default function SidebarItem({
@@ -17,11 +19,15 @@ export default function SidebarItem({
   label,
   className,
   iconClassName,
+  variants,
 }: SidebarItemProps) {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <li className={`w-full flex justify-center ${className}`}>
+    <motion.li 
+      variants={variants}
+      className={`w-full flex justify-center ${className}`}
+    >
       <Link
         href={href}
         onMouseEnter={() => setHovered(true)}
@@ -39,6 +45,6 @@ export default function SidebarItem({
           </span>
         </div>
       </Link>
-    </li>
+    </motion.li>
   );
 }

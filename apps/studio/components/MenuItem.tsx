@@ -1,11 +1,22 @@
+"use client";
 import { useState } from "react";
 import React from "react";
+import { motion, Variants } from "motion/react";
 
-const MenuItem = ({ icon, label, isDanger = false, onClick }: { icon: React.ReactNode; label: string; isDanger?: boolean; onClick?: () => void }) => {
+interface MenuItemProps {
+  icon: React.ReactNode;
+  label: string;
+  isDanger?: boolean;
+  onClick?: () => void;
+  variants?: Variants;
+}
+
+const MenuItem = ({ icon, label, isDanger = false, onClick, variants }: MenuItemProps) => {
   const [hovered, setHovered] = useState(false);
 
   return (
-    <button
+    <motion.button
+      variants={variants}
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
@@ -16,7 +27,7 @@ const MenuItem = ({ icon, label, isDanger = false, onClick }: { icon: React.Reac
         {React.cloneElement(icon as React.ReactElement<{ hovered: boolean }>, { hovered })}
       </span>
       {label}
-    </button>
+    </motion.button>
   );
 };
 

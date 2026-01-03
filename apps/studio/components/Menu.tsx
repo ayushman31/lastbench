@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, Variants } from 'motion/react';
 import { MenuItem } from './MenuItem';
 import GearIcon from './icons/settings';
 import CreditCard from './icons/credit';
@@ -9,13 +9,23 @@ import UserCheckIcon from './icons/user';
 import LogoutIcon from './icons/logout';
 import { authClient, useSession } from '@repo/auth/client';
 
+// animation variants for staggered menu items
+const menuItemVariants = {
+  hidden: { opacity: 0, x: 20 },
+  visible: { 
+    opacity: 1, 
+    x: 0,
+    transition: { type: "spring", stiffness: 300, damping: 24 }
+  }
+};
+
 const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const { session, loading, user } = useSession();
 
-  // Close menu when clicking outside
+  // close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !(menuRef.current as HTMLElement).contains(event.target as Node)) {
@@ -31,11 +41,25 @@ const Menu = () => {
   const userName = user.name || user.email;
 
   return (
-    <div className="flex justify-center p-4 text-neutral-200">
+    <motion.div 
+      initial={{ x: "100%" }}
+      animate={{ x: 0 }}
+      transition={{ 
+        duration: 0.5, 
+        ease: "easeOut",
+        type: "spring",
+        stiffness: 100,
+        damping: 20
+      }}
+      className="flex justify-center p-4 text-neutral-200"
+    >
       <div className="w-full flex justify-end items-start gap-4">
         
         <div className="relative" ref={menuRef}>
-          <button 
+          <motion.button 
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3, duration: 0.3 }}
             onClick={() => setIsOpen(!isOpen)}
             className="relative w-10 h-10 rounded-lg overflow-hidden border-2 border-transparent hover:border-neutral-600 transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-black"
           >
@@ -44,21 +68,44 @@ const Menu = () => {
               alt={user.name || "User"}
               className="w-full h-full object-cover"
             />
-          </button>
+          </motion.button>
 
           <AnimatePresence>
             {isOpen && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: -10 }}
+                initial={{ opacity: 0, scale: 0.85, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                transition={{ 
+                  duration: 0.3, 
+                  ease: [0.34, 1.56, 0.64, 1],
+                  opacity: { duration: 0.2 }
+                }}
                 className="absolute right-0 top-14 w-80 bg-card border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50"
+                style={{ transformOrigin: 'top right' }}
               >
-                <div className="p-2">
+                {/* spotlight effect */}
+                <div className="absolute top-0 left-0 w-40 h-40 pointer-events-none">
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.15, duration: 0.5, ease: "easeOut" }}
+                    className="absolute top-0 left-0 w-full h-full"
+                    style={{
+                      background: 'radial-gradient(circle at top left, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.1) 40%, transparent 70%)',
+                      filter: 'blur(25px)',
+                    }}
+                  />
+                </div>
+
+                <div className="p-2 relative">
                   
-                  {/* 1. Header: Current User */}
-                  <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer group">
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.1, duration: 0.3 }}
+                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer group"
+                  >
                     <div className="w-10 h-10 rounded-full overflow-hidden">
                       <img 
                         src={user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || user.email)}`}
@@ -70,51 +117,58 @@ const Menu = () => {
                       <span className="text-sm font-semibold text-white">{userName}</span>
                       <span className="text-xs text-neutral-400">{user.email}</span>
                     </div>
-                  </div>
-
-                  {/* <div className="h-px bg-neutral-800 my-2 mx-1" /> */}
-
-                  {/* FUTURE ENHANCEMENT: Workspace Switcher */}
-                  {/* <div className="px-2 py-1"> */}
-                    {/* <span className="text-xs font-medium text-neutral-500 uppercase tracking-wider ml-1">Switch Workspaces</span>
-                    
-                    <div className="mt-2 flex items-center justify-between p-2 rounded-lg bg-neutral-800/50 hover:bg-neutral-800 transition-colors cursor-pointer group border border-transparent hover:border-neutral-700">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded bg-pink-600 flex items-center justify-center text-xs font-bold text-white">
-                          A
-                        </div>
-                        <span className="text-sm text-neutral-200">Users Workspace</span>
-                      </div>
-                      <span className="text-[10px] font-medium text-neutral-400 bg-neutral-700/50 px-1.5 py-0.5 rounded">Free</span>
-                    </div> */}
-
-                    {/* <div className="mt-1 flex items-center justify-between p-2 rounded-lg hover:bg-neutral-800 transition-colors cursor-pointer group">
-                      <div className="flex items-center gap-3">
-                        <div className="w-6 h-6 rounded border border-neutral-600 border-dashed flex items-center justify-center text-neutral-400 group-hover:border-neutral-400 group-hover:text-neutral-200 transition-colors">
-                          <Plus size={14} />
-                        </div>
-                        <span className="text-sm text-neutral-400 group-hover:text-neutral-200">Create new</span>
-                      </div>
-                      
-                      <button className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded text-[10px] font-bold text-white hover:opacity-90 transition-opacity shadow-lg shadow-purple-900/20">
-                        <span className="text-[10px]">✨</span> Upgrade
-                      </button>
-                    </div> */}
-
-                  {/* </div> */}
+                  </motion.div>
 
                   <div className="h-px w-full bg-border my-2" />
 
-                  <div className="space-y-0.5">
-                    <MenuItem icon={<UserCheckIcon hovered={false} size={18} />} label="Personal info" />
-                    <MenuItem icon={<ShieldCheck hovered={false} size={18} />} label="Account Security" />
-                    <MenuItem icon={<CreditCard hovered={false} size={18} />} label="Manage Subscription" />
-                    <MenuItem icon={<GearIcon hovered={false} size={18} />} label="Settings" />
-                  </div>
+                  <motion.div 
+                    className="space-y-0.5"
+                    initial="hidden"
+                    animate="visible"
+                    variants={{
+                      hidden: { opacity: 0 },
+                      visible: {
+                        opacity: 1,
+                        transition: {
+                          staggerChildren: 0.08,
+                          delayChildren: 0.15
+                        }
+                      }
+                    }}
+                  >
+                    <MenuItem 
+                      icon={<UserCheckIcon hovered={false} size={18} />} 
+                      label="Personal info" 
+                      variants={menuItemVariants as Variants}
+                    />
+                    <MenuItem 
+                      icon={<ShieldCheck hovered={false} size={18} />} 
+                      label="Account Security" 
+                      variants={menuItemVariants as Variants}
+                    />
+                    <MenuItem 
+                      icon={<CreditCard hovered={false} size={18} />} 
+                      label="Manage Subscription" 
+                      variants={menuItemVariants as Variants}
+                    />
+                    <MenuItem 
+                      icon={<GearIcon hovered={false} size={18} />} 
+                      label="Settings" 
+                      variants={menuItemVariants as Variants}
+                    />
+                  
 
                   <div className="h-px bg-neutral-800 my-2 mx-1" />
 
-                  <MenuItem icon={<LogoutIcon hovered={false} size={18} />} label="Logout" isDanger={false} onClick={() => {authClient.signOut(); window.location.href = "http://localhost:3000"}} />
+                 
+                    <MenuItem 
+                      icon={<LogoutIcon hovered={false} size={18} />} 
+                      label="Logout" 
+                      isDanger={false} 
+                      variants={menuItemVariants as Variants}
+                      onClick={() => {authClient.signOut(); window.location.href = "http://localhost:3000"}} 
+                    />
+                  </motion.div>
                   
                 </div>
               </motion.div>
@@ -122,10 +176,8 @@ const Menu = () => {
           </AnimatePresence>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
-
-// Reusable Menu Item Component for cleaner code
 
 export { Menu };
