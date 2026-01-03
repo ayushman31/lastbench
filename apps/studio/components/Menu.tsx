@@ -92,7 +92,7 @@ const Menu = () => {
                     transition={{ delay: 0.15, duration: 0.5, ease: "easeOut" }}
                     className="absolute top-0 left-0 w-full h-full"
                     style={{
-                      background: 'radial-gradient(circle at top left, rgba(99, 102, 241, 0.2) 0%, rgba(139, 92, 246, 0.1) 40%, transparent 70%)',
+                      background: 'radial-gradient(circle at top left, rgba(29, 222, 55, 0.2) 0%, rgba(17, 205, 95, 0.1) 40%, transparent 70%)',
                       filter: 'blur(25px)',
                     }}
                   />

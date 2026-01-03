@@ -1,6 +1,6 @@
 'use client';
 import { motion, LayoutGroup } from "motion/react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface TabsProps {
   className?: string;
@@ -15,10 +15,30 @@ const tabs = [
 
 export const Tabs = ({ className }: TabsProps) => {
   const [activeTab, setActiveTab] = useState("");
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target as Node)
+      ) {
+        setActiveTab(""); // reset when clicking outside
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   return (
     <LayoutGroup>
-      <div className={`flex space-x-1 z-10 ${className}`}>
+      <div
+        ref={containerRef}
+        className={`flex space-x-1 z-10 ${className}`}
+      >
         {tabs.map((tab) => (
           <button
             key={tab.id}

@@ -2,16 +2,16 @@
 
 import { authClient } from "@repo/auth/client";
 import { useState } from "react";
-import { Mail, Lock, User, CheckSquare, Square, Loader2 } from "lucide-react";
+import { Mail, Lock, CheckSquare, Square, Loader2 } from "lucide-react";
 import { AuthLayout, InputField, SocialButton } from "../../components/AuthLayout";
 
-export default function SignupPage() {
-  const [name, setName] = useState("");
+export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  
+
   const handleGoogle = async () => {
     try {
       setLoading(true);
@@ -27,28 +27,37 @@ export default function SignupPage() {
     }
   };
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleEmailLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError("");
+    
     try {
-      const result = await authClient.signUp.email({
-        email, password, name, callbackURL: "http://localhost:3001"
+      setLoading(true);
+      setError("");
+
+      const result = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: "http://localhost:3001", // Redirect to Studio
       });
-      if (result.error) throw new Error(result.error.message);
-      window.location.href = "http://localhost:3001";
+
+      if (result.error) {
+        setError(result.error.message || "Failed to sign up");
+      } else {
+        // Redirect to Studio on success
+        window.location.href = "http://localhost:3001";
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to sign up");
+      setError(err.message || "Failed to sign in");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <AuthLayout mode="signup">
+    <AuthLayout mode="signin">
       <div className="mb-8 text-center">
-        <h1 className="text-3xl font-bold tracking-tight mb-2">Create an account</h1>
-        <p className="text-muted-foreground text-sm">Enter your details to get started.</p>
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Welcome back</h1>
+        <p className="text-muted-foreground text-sm">Enter your details to access your workspace.</p>
       </div>
 
       <div className="mb-6"><SocialButton onClick={handleGoogle} disabled={loading} /></div>
@@ -60,13 +69,20 @@ export default function SignupPage() {
 
       {error && <div className="mb-4 text-red-600 bg-red-50 p-3 rounded-lg text-sm">{error}</div>}
 
-      <form onSubmit={handleSignup} className="space-y-4">
-        <InputField type="text" placeholder="Full Name" value={name} onChange={(e: any) => setName(e.target.value)} icon={User} required />
+      <form onSubmit={handleEmailLogin} className="space-y-4">
         <InputField type="email" placeholder="Email" value={email} onChange={(e: any) => setEmail(e.target.value)} icon={Mail} required />
-        <InputField type="password" placeholder="Create Password (min 8 chars)" value={password} onChange={(e: any) => setPassword(e.target.value)} icon={Lock} required />
+        <InputField type="password" placeholder="Password" value={password} onChange={(e: any) => setPassword(e.target.value)} icon={Lock} required />
         
+        <div className="flex items-center justify-between text-sm">
+          <button type="button" onClick={() => setRememberMe(!rememberMe)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors">
+            {rememberMe ? <CheckSquare size={18} className="text-primary-foreground" /> : <Square size={18} className="text-muted-foreground" />}
+            <span>Keep me logged in</span>
+          </button>
+          <button type="button" className="text-muted-foreground hover:text-foreground transition-colors">Forgot password?</button>
+        </div>
+
         <button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground font-medium py-3 rounded-xl mt-6 hover:bg-primary/90 hover:text-primary-foreground/90 transition-all flex items-center justify-center gap-2">
-          {loading && <Loader2 size={18} className="animate-spin" />} Sign Up
+          {loading && <Loader2 size={18} className="animate-spin" />} Login
         </button>
       </form>
     </AuthLayout>
