@@ -5,8 +5,8 @@ import { Globe } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Eye, EyeOff } from "lucide-react";
 
-// --- Configuration ---
 const QUOTES = [
   {
     text: "Podcasting is the most intimate medium in the world. You’re literally inside someone’s head.",
@@ -60,12 +60,9 @@ export function AuthLayout({ children, mode }: { children: React.ReactNode, mode
   return (
     <div className="flex min-h-screen bg-background text-primary-foreground">
       
-      {/* --- Left Column: Form Content --- */}
       <div className="w-full lg:w-1/2 flex flex-col p-6 lg:p-12 xl:p-20 relative">
         
-        {/* Header */}
         <div className="flex justify-between items-center mb-12">
-          {/* Logo */}
           <Link href="/" className="w-10 h-10 text-primary-foreground rounded-xl flex items-center justify-center shadow-lg shadow-black/20 hover:scale-105 transition-transform">
             <Image src="/logo.svg" alt="logo" width={48} height={48} />
           </Link>
@@ -76,19 +73,17 @@ export function AuthLayout({ children, mode }: { children: React.ReactNode, mode
             </span>
             <Link 
               href={mode === "signin" ? "/signup" : "/login"}
-              className="font-semibold text-primary-foreground hover:underline underline-offset-4"
+              className="text-primary-foreground font-semibold cursor-pointer relative inline-block after:content-[''] after:absolute after:left-0 after:bottom-0 after:h-[1px] after:w-full after:bg-primary after:scale-x-0 after:origin-left after:transition-transform after:duration-300 hover:after:scale-x-100"
             >
               {mode === "signin" ? "Register" : "Login"}
             </Link>
           </div>
         </div>
 
-        {/* Main Form Area */}
         <div className="flex-1 flex flex-col justify-center max-w-md mx-auto w-full">
           {children}
         </div>
 
-        {/* Footer */}
         <div className="flex justify-between items-center text-xs text-muted-foreground mt-12">
           <span>© 2025 LastBench</span>
           <div className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
@@ -98,11 +93,8 @@ export function AuthLayout({ children, mode }: { children: React.ReactNode, mode
         </div>
       </div>
 
-      {/* --- Right Column: Animated Showcase --- */}
       <div className="hidden lg:flex w-1/2 bg-background relative overflow-hidden items-center justify-center p-12">
         <div className="absolute inset-0 opacity-[0.4]" />
-        {/* // style={{ backgroundImage: 'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)', backgroundSize: '40px 40px' }} /> */}
-        {/* <div className="absolute inset-0 bg-gradient-to-t from-zinc-50 via-transparent to-zinc-50/20" /> */}
 
         <div className="relative max-w-lg w-full">
           <AnimatePresence mode="wait">
@@ -117,7 +109,7 @@ export function AuthLayout({ children, mode }: { children: React.ReactNode, mode
               <motion.img 
                 src={QUOTES[currentQuote]?.avatar}
                 alt={QUOTES[currentQuote]?.author}
-                className="w-16 h-16 rounded-2xl mb-8 bg-background shadow-sm border border-border p-1"
+                className="w-16 h-16 rounded-2xl mb-8 bg-muted shadow-sm border border-border p-1"
                 initial={{ rotate: -5 }}
                 animate={{ rotate: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
@@ -127,7 +119,7 @@ export function AuthLayout({ children, mode }: { children: React.ReactNode, mode
                 <div className="h-px w-8 bg-muted-foreground"></div>
                 <div>
                   <p className="font-semibold text-primary-foreground">{QUOTES[currentQuote]?.author}</p>
-                  <p className="text-sm text-muted-foreground">{QUOTES[currentQuote]?.role}</p>
+                  <p className="text-sm text-primary">{QUOTES[currentQuote]?.role}</p>
                 </div>
               </div>
             </motion.div>
@@ -137,8 +129,6 @@ export function AuthLayout({ children, mode }: { children: React.ReactNode, mode
     </div>
   );
 }
-
-// --- Shared UI Components ---
 
 export function SocialButton({ onClick, disabled }: { onClick: () => void, disabled: boolean }) {
   return (
@@ -159,7 +149,6 @@ export function SocialButton({ onClick, disabled }: { onClick: () => void, disab
   );
 }
 
-import { Eye, EyeOff } from "lucide-react";
 
 export function InputField({ type, placeholder, value, onChange, icon: Icon, required }: any) {
   const [show, setShow] = useState(false);

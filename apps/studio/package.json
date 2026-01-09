@@ -14,6 +14,7 @@
     "@gsap/react": "^2.1.2",
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
+    "@repo/recording-engine": "workspace:*",
     "@repo/ui": "workspace:*",
     "@tailwindcss/postcss": "^4.1.18",
     "gsap": "^3.14.2",

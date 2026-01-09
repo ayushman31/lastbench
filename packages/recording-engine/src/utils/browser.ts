@@ -26,7 +26,7 @@ interface NavigatorUAData {
   
 
 export function detectBrowser(): BrowserInfo {
-  const ua = (navigator as Navigator).userAgent;
+  const ua = (navigator as Navigator).userAgent; // this one is deprecated ig
   
   const uaData = (navigator as Navigator & { userAgentData?: NavigatorUAData }).userAgentData;
 
@@ -112,7 +112,7 @@ export function detectBrowser(): BrowserInfo {
 
 function extractMajorVersion(ua: string, token: string): number {
   const match = ua.match(new RegExp(`${token}(\\d+)`));
-  return match ? parseInt(match[1], 10) : 0;
+  return match ? parseInt(match[1] ?? '0', 10) : 0;
 }
 
 type MediaRecorderSupportResult =

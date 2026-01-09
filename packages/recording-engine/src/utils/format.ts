@@ -137,14 +137,14 @@ export function getExtensionFromMimeType(mimeType: string): string | undefined {
   }
 
   // handle MIME types with codecs
-  const baseType = mimeType.split(';')[0].trim().toLowerCase();
-  return mimeToExt[baseType] || undefined;
+  const baseType = mimeType.split(';')[0]?.trim().toLowerCase();
+  return mimeToExt[baseType ?? ''] || undefined;
 }
   
   // extract codec from MIME type string
   export function extractCodecs(mimeType: string): string[] {
     const match = mimeType.match(/codecs=([^;]+)/i);
-    return match ? match[1].replace(/"/g, '').split(',').map(c => c.trim().toLowerCase()).filter(Boolean) : [];
+    return match ? match[1]?.replace(/"/g, '').split(',').map(c => c.trim().toLowerCase()).filter(Boolean) ?? [] : [];
   }
   
   // validate file size against maximum
@@ -163,7 +163,7 @@ export function getExtensionFromMimeType(mimeType: string): string | undefined {
     mimeType?: string
   ): string {
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-    const random = crypto.getRandomValues(new Uint32Array(1))[0].toString(36);
+    const random = crypto.getRandomValues(new Uint32Array(1))[0]?.toString(36) ?? '';
     const safePrefix = prefix.replace(/[^a-z0-9_-]/gi, '_');
   
     const extension = getExtensionFromMimeType(mimeType ?? '') ?? 'webm';
