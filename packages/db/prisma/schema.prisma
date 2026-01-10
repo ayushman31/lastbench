@@ -117,3 +117,26 @@ model Track {
   @@index([recordingId])
   @@map("Track")
 }
+
+model UploadSession {
+  id             String   @id @default(cuid())
+  userId         String
+  recordingId    String
+  filename       String
+  mimeType       String
+  totalSize      Int
+  chunkSize      Int
+  totalChunks    Int
+  uploadedChunks Int[]
+  storageKey     String
+  uploadId       String?
+  status         String   @default("initializing")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  expiresAt      DateTime
+
+  @@index([userId])
+  @@index([recordingId])
+  @@index([status])
+  @@index([expiresAt])
+}
