@@ -63,6 +63,7 @@ export interface RecordingMetadata {
   audioTracks: number;
   videoTracks: number;
   dataSize: number;
+  metadata: Object;
 }
 
 export type RecordingEventCallback = (event: RecordingEvent) => void;

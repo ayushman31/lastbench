@@ -242,6 +242,10 @@ import {
         this.recorder!.stop();
       });
     }
+
+    getStream(): MediaStream | null {
+      return this.stream;
+    }
   
     dispose(): void {
       if (this.disposed) return;
