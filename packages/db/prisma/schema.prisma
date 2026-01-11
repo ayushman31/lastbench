@@ -131,6 +131,7 @@ model UploadSession {
   storageKey     String
   uploadId       String?
   status         String   @default("initializing")
+  etags          Json?  // for storing etags
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   expiresAt      DateTime
