@@ -7,6 +7,7 @@ import type {
   UploadChunkRequest,
   CompleteUploadRequest,
 } from '../types';
+import { Readable } from 'stream';
 
 const router : Router = Router();
 
@@ -44,6 +45,14 @@ router.post('/init', async (req: Request, res: Response) => {
       filename
     );
 
+    // initialize s3 multipart upload if supported
+    let uploadId: string | undefined;
+    const useMultipart = UploadStorage.supportsMultipart() && totalSize > 100 * 1024 * 1024; // > 100MB 
+
+    if (useMultipart) {
+      uploadId = await UploadStorage.initMultipartUpload(storageKey, mimeType);
+    }
+
     const session = await UploadSessionDB.create({
       userId,
       recordingId,
@@ -54,6 +63,7 @@ router.post('/init', async (req: Request, res: Response) => {
       totalChunks,
       uploadedChunks: [],
       storageKey,
+      uploadId,
       status: 'initializing',
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours
     });
@@ -65,6 +75,7 @@ router.post('/init', async (req: Request, res: Response) => {
       uploadUrl: `/api/upload/chunk`,
       chunkSize,
       totalChunks,
+      useMultipart,
     });
   } catch (error) {
     console.error('Init upload error:', error);
@@ -115,19 +126,35 @@ router.post(
       );
 
       if (!alreadyUploaded) {
-        await UploadStorage.uploadChunk(
+
+        const stream = Readable.from(chunk.buffer);
+
+        if (session.uploadId) {
+          // use s3 multipart
+          const etag = await UploadStorage.uploadMultipartChunk(
+            session.storageKey,
+            session.uploadId,
+            index + 1, // s3 part numbers start at 1
+            stream,
+            chunk.size
+          );
+
+          // Store ETag for completion (we will need to add this to database)
+          // await UploadSessionDB.storePartETag(sessionId, index + 1, etag);
+        } else {
+        await UploadStorage.uploadChunkStream(
           session.storageKey,
           index,
-          chunk.buffer,
+          stream,
           session.mimeType
         );
+      }
 
         await UploadSessionDB.markChunkUploaded(sessionId, index);
       }
 
       const updatedSession = await UploadSessionDB.getById(sessionId);
-      const progress =
-        (updatedSession!.uploadedChunks.length / updatedSession!.totalChunks) *100;
+      const progress = (updatedSession!.uploadedChunks.length / updatedSession!.totalChunks) *100;
 
       res.json({
         chunkIndex: index,
@@ -175,7 +202,6 @@ router.post('/complete', async (req: Request, res: Response) => {
       });
     }
 
-    // get upload session
     const session = await UploadSessionDB.getById(sessionId);
     if (!session) {
       return res.status(404).json({
@@ -183,7 +209,6 @@ router.post('/complete', async (req: Request, res: Response) => {
       });
     }
 
-    // check if all chunks uploaded
     if (session.uploadedChunks.length !== session.totalChunks) {
       return res.status(400).json({
         error: 'Not all chunks uploaded',
@@ -192,20 +217,37 @@ router.post('/complete', async (req: Request, res: Response) => {
       });
     }
 
+    let result;
+
     await UploadSessionDB.update(sessionId, { status: 'merging' });
 
-    const result = await UploadStorage.mergeChunks(
-      session.storageKey,
-      session.totalChunks,
-      session.mimeType
-    );
+    if (session.uploadId) {
+      // complete s3 multipart upload
+      // we will need to retrieve stored ETags from database
+      const parts = session.uploadedChunks.map((index) => ({
+        PartNumber: index + 1,
+        ETag: 'stored-etag', // retrieve from DB
+      }));
+
+      result = await UploadStorage.completeMultipartUpload(
+        session.storageKey,
+        session.uploadId,
+        parts
+      );
+    } else {
+      // merge chunks using streaming
+      result = await UploadStorage.mergeChunksStreaming(
+        session.storageKey,
+        session.totalChunks,
+        session.mimeType
+      );
+    }
 
     await UploadSessionDB.update(sessionId, { status: 'completed' });
 
     res.json({
       url: result.url,
       storageKey: session.storageKey,
-      size: result.size,
     });
   } catch (error) {
     console.error('Complete upload error:', error);

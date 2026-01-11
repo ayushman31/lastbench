@@ -12,17 +12,18 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@repo/db": "workspace:*",
-    "@repo/storage": "workspace:*",
     "@aws-sdk/client-s3": "^3.948.0",
     "@aws-sdk/lib-storage": "^3.966.0",
+    "@repo/db": "workspace:*",
+    "@repo/storage": "workspace:*",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
     "multer": "^2.0.2"
   },
   "devDependencies": {
-    "@repo/typescript-config": "workspace:*",
     "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/multer": "^2.0.0",

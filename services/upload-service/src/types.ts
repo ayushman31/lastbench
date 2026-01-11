@@ -19,6 +19,7 @@ export interface UploadSession {
     storageKey: string;
     uploadId?: string; // s3 multipart upload ID
     status: UploadStatus;
+    etags?: Record<string, string>; // for storing etags
     createdAt: Date;
     updatedAt: Date;
     expiresAt: Date;

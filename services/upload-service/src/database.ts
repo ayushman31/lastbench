@@ -110,4 +110,21 @@ export class UploadSessionDB {
       expiresAt: data.expiresAt,
     };
   }
+
+  // store part ETag  TODO ig it is not working as expected for now
+  static async storePartETag(sessionId: string, partNumber: number, etag: string): Promise<void> {
+    const session = await this.getById(sessionId);
+    if (!session) throw new Error('Session not found');
+  
+    const etags = session.etags || {};
+    etags[`part_${partNumber}`] = etag;
+  
+    await prisma.uploadSession.update({
+      where: { id: sessionId },
+      data: {
+        etags,
+        updatedAt: new Date(),
+      },
+    });
+  }
 }
