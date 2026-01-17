@@ -15,3 +15,5 @@ to run this
     [profile seaweedfs]
     region = us-east-1  //seaweed requires this so add this just to keep it happy
     output = json
+
+- to check recordings : aws --profile seaweedfs --endpoint-url http://localhost:8333 s3 ls s3://lastbench-recordings/recordings/     (this would give users)

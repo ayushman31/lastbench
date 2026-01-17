@@ -282,6 +282,7 @@ import {
         audioTracks: this.stream?.getAudioTracks().length ?? 0,
         videoTracks: this.stream?.getVideoTracks().length ?? 0,
         dataSize: this.size,
+        metadata: this.config,
       };
     }
   
