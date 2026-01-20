@@ -3,6 +3,7 @@
 import { motion } from 'motion/react';
 import { Video } from 'lucide-react';
 import { Button } from '../ui/button';
+import VideoIcon from '../icons/video';
 
 export const PermissionsScreen = ({
   onAllow,
@@ -15,8 +16,8 @@ export const PermissionsScreen = ({
       animate={{ opacity: 1, y: 0 }}
       className="bg-card border border-border p-8 rounded-2xl max-w-md w-full text-center shadow-2xl"
     >
-      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
-        <Video size={32} className="text-primary" />
+      <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6">
+        <VideoIcon size={32} className="text-primary" hovered={false} />
       </div>
 
       <h2 className="text-2xl font-bold mb-2">
