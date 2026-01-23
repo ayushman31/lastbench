@@ -17,7 +17,7 @@ export const LobbyScreen = ({
   setSelectedCam,
   onJoin,
 }: any) => {
-  const [isMicMuted, setIsMicMuted] = useState<boolean>(false);
+  const [isMicMuted, setIsMicMuted] = useState<boolean>(true);
   const [isCamOff, setIsCamOff] = useState<boolean>(false);
   const handleMicToggle = () => {
     setIsMicMuted(!isMicMuted);
