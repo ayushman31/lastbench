@@ -50,3 +50,14 @@ export type {
   PeerConnectionError,
   PeerErrorCode,
 } from './peer/peer-types';
+
+
+export { MultiTrackRecorder } from './peer/MultiTrackRecorder';
+export type {
+  TrackRecordingConfig,
+  ParticipantTrack,
+  RecordingSession,
+  MultiTrackEventType,
+  MultiTrackEvent,
+  MultiTrackEventCallback,
+} from './peer/multiTrack-types';
