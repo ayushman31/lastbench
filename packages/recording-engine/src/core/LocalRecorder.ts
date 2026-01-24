@@ -1,7 +1,7 @@
 import {
     getSupportedMimeType,
     checkMediaRecorderSupport,
-  } from './utils/browser';
+  } from '../utils/browser';
   
   import {
     RecordingConfig,

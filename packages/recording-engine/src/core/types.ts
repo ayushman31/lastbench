@@ -91,4 +91,10 @@ export type RecordingErrorCode =
   | 'MIME_TYPE_NOT_SUPPORTED'
   | 'INITIALIZATION_FAILED'
   | 'STREAM_ENDED'
+  | 'CONNECTION_FAILED'      
+  | 'SIGNALING_FAILED'       
+  | 'ICE_FAILED'             
+  | 'STREAM_UNAVAILABLE'     
+  | 'DATA_CHANNEL_FAILED'    
+  | 'TIMEOUT'                
   | 'UNKNOWN';

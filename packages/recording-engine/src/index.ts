@@ -1,4 +1,4 @@
-export { LocalRecorder } from './LocalRecorder';
+export { LocalRecorder } from './core/LocalRecorder';
 
 export {
   detectBrowser,
@@ -31,4 +31,22 @@ export type {
   RecordingMetadata,
   RecordingError,
   RecordingErrorCode,
-} from './types';
+} from './core/types';
+
+
+export { PeerConnectionManager } from './peer/PeerConnectionManager';
+
+export type {
+  PeerConfig,
+  RemotePeer,
+  PeerConnectionState,
+  PeerStats,
+  SignalingMessage,
+  SignalingState,
+  SessionInfo,
+  PeerEventType,
+  PeerEvent,
+  PeerEventCallback,
+  PeerConnectionError,
+  PeerErrorCode,
+} from './peer/peer-types';
