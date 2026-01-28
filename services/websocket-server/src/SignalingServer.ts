@@ -2,6 +2,7 @@ import WebSocket, { WebSocketServer } from 'ws';
 import { v4 as uuidv4 } from 'uuid';
 import { SessionManager } from './SessionManager.js';
 import type { SignalingMessage, Client, JoinSessionMessage, WebRTCSignal, Session } from './types.js';
+import { verifySession } from './auth.js';
 
 export class SignalingServer {
   private wss: WebSocketServer;
@@ -16,18 +17,26 @@ export class SignalingServer {
   }
 
   private setupServer(): void {
-    this.wss.on('connection', (ws: WebSocket) => {
-      const clientId = uuidv4();
-      console.log(`New WebSocket connection: ${clientId}`);
+    this.wss.on('connection', async (ws: WebSocket , request) => {
+      const session = await verifySession(request);
 
-      // create client object (will be fully initialized on join-session)
+      if (!session) {
+        console.warn('Unauthorized WebSocket connection attempt');
+        ws.close(1008, 'Unauthorized');
+        return;
+      }
+
+      const clientId = uuidv4();
+      console.log(`New WebSocket connection: ${clientId} (user: ${session.userId})`);
+
+      // create authenticated client object
       const client: Client = {
         id: clientId,
-        userId: '', // Set when joining session
-        userName: undefined,
+        userId: session.userId,
+        userName: session.name || undefined,
         sessionId: null,
         ws,
-        isHost: false,
+        isHost: false, //will be setup by server logic not client
         joinedAt: new Date(),
         lastPing: new Date(),
       };
@@ -37,7 +46,7 @@ export class SignalingServer {
       // send client their id
       this.sendMessage(ws, {
         type: 'session-update',
-        data: { clientId },
+        data: { clientId, userId: session.userId, userName: session.name || undefined },
         timestamp: Date.now(),
       });
 
@@ -102,23 +111,25 @@ export class SignalingServer {
 
   private handleJoinSession(client: Client, data: JoinSessionMessage): void {
     try {
-      const { sessionId, userId, userName, isHost } = data;
+      const { sessionId, isHost } = data;
 
-      // update client info
-      client.userId = userId;
-      client.userName = userName;
-      client.isHost = isHost || false;
 
       let session = this.sessionManager.getSession(sessionId);
+      const userIsHost = isHost && !session; // only first person can be host
 
       // create session if host and doesn't exist
-      if (isHost && !session) {
-        session = this.sessionManager.createSession(client.id, userName);
+      if (userIsHost) {
+        session = this.sessionManager.createSession(client.id, client.userName);
       }
 
       if (!session) {
         throw new Error('Session not found');
       }
+
+      if (isHost && session.hostId !== client.id) {
+        throw new Error('You are not the host of this session');
+      }
+      client.isHost = userIsHost || false;
 
       // add client to session
       this.sessionManager.addClientToSession(session.id, client);
@@ -129,6 +140,8 @@ export class SignalingServer {
         sessionId: session.id,
         data: {
           joined: true,
+          userId: client.userId,
+          userName: client.userName,
           sessionId: session.id,
           clientId: client.id,
           isHost: client.isHost,

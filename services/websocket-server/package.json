@@ -14,6 +14,8 @@
   "license": "ISC",
   "dependencies": {
     "@repo/db": "workspace:*",
+    "@repo/auth": "workspace:*",
+    "cookie": "^1.1.1",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "uuid": "^13.0.0",

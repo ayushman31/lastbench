@@ -53,8 +53,6 @@ export interface ConnectionQuality {
 
 export interface JoinSessionMessage {
   sessionId: string;
-  userId: string;
-  userName?: string;
   isHost?: boolean;
 }
 
