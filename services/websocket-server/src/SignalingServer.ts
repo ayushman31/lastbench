@@ -3,10 +3,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { SessionManager } from './SessionManager.js';
 import type { SignalingMessage, Client, JoinSessionMessage, WebRTCSignal, Session } from './types.js';
 import { verifySession } from './auth.js';
+import { RateLimiter } from './rateLimiter.js';
 
 export class SignalingServer {
   private wss: WebSocketServer;
   private sessionManager: SessionManager;
+  private rateLimiter = new RateLimiter({ windowMs: 1000, maxMessages: 10 });
 
   constructor(wss: WebSocketServer) {
     this.wss = wss;
@@ -75,6 +77,16 @@ export class SignalingServer {
   }
 
   private handleMessage(client: Client, data: string): void {
+    if (!this.rateLimiter.checkLimit(client.id)) {
+      this.sendError(client.ws, 'Rate limit exceeded');
+      return;
+    }
+
+    if (data.length > 10000) { // 10KB max
+      this.sendError(client.ws, 'Message too large');
+      return;
+    }
+
     try {
       const message: SignalingMessage = JSON.parse(data);
       message.timestamp = Date.now();

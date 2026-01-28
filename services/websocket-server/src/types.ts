@@ -76,3 +76,13 @@ export interface SessionStats {
     connectionQuality?: ConnectionQuality;
   }>;
 }
+
+export interface RateLimitConfig {
+  windowMs: number; // in ms
+  maxMessages: number; // max messages per window
+}
+
+export interface ClientRateLimit {
+  count: number;
+  resetTime: number;
+}
