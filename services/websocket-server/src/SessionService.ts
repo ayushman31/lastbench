@@ -8,7 +8,7 @@ import type { CreateSessionInput, JoinAsGuestInput } from './types.js';
 export class SessionService {
 
   static async createSession(input: CreateSessionInput) {
-    const inviteToken = this.generateInviteToken();
+    const inviteToken = await this.generateInviteToken();
     const expiresAt = new Date();
     expiresAt.setHours(expiresAt.getHours() + (input.expiresInHours || 6));
 
@@ -135,8 +135,15 @@ export class SessionService {
     });
   }
 
-  private static generateInviteToken(): string {
-    return randomBytes(32).toString('base64url');
+  private static async generateInviteToken(): Promise<string> {
+    const token = randomBytes(32).toString('base64url');
+    const existingSession = await prisma.recordingSession.findUnique({
+      where: { inviteToken: token },
+    });
+    if (existingSession) {
+      return this.generateInviteToken();
+    }
+    return token;
   }
 
   private static generateInviteLink(token: string): string {
