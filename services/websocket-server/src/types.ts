@@ -86,3 +86,21 @@ export interface ClientRateLimit {
   count: number;
   resetTime: number;
 }
+
+// session service types
+
+export interface CreateSessionInput {
+  hostId: string;
+  hostName?: string;
+  title?: string;
+  description?: string;
+  maxGuests?: number;
+  expiresInHours?: number;
+}
+
+export interface JoinAsGuestInput {
+  inviteToken: string;
+  guestName?: string;
+  guestEmail?: string;
+  clientId: string;
+}
