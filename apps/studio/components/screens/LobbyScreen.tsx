@@ -8,6 +8,16 @@ import { DeviceSelect } from '../DeviceSelect';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
+interface LobbyScreenProps {
+  stream: MediaStream | null;
+  devices: { audio: MediaDeviceInfo[], video: MediaDeviceInfo[] };
+  selectedMic: string;
+  setSelectedMic: (mic: string) => void;
+  selectedCam: string;
+  setSelectedCam: (cam: string) => void;
+  onJoin: () => void;
+}
+
 export const LobbyScreen = ({
   stream,
   devices,
@@ -16,12 +26,12 @@ export const LobbyScreen = ({
   selectedCam,
   setSelectedCam,
   onJoin,
-}: any) => {
+}: LobbyScreenProps) => {
   const [isMicMuted, setIsMicMuted] = useState<boolean>(true);
   const [isCamOff, setIsCamOff] = useState<boolean>(false);
   const handleMicToggle = () => {
     setIsMicMuted(!isMicMuted);
-    stream.getAudioTracks().forEach((track: MediaStreamTrack) => track.enabled = !isMicMuted);
+    stream?.getAudioTracks().forEach((track: MediaStreamTrack) => track.enabled = !isMicMuted);
   };
   const handleCamToggle = () => {
     setIsCamOff(!isCamOff);
