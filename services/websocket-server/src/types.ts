@@ -29,6 +29,7 @@ export interface Client {
   sessionId: string | null;
   ws: WebSocket;
   isHost: boolean;
+  isGuest: boolean;
   joinedAt: Date;
   lastPing: Date;
   connectionQuality?: ConnectionQuality;

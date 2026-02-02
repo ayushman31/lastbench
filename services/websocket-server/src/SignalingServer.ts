@@ -4,6 +4,7 @@ import { SessionManager } from './SessionManager.js';
 import type { SignalingMessage, Client, JoinSessionMessage, WebRTCSignal, Session } from './types.js';
 import { verifySession } from './auth.js';
 import { RateLimiter } from './rateLimiter.js';
+import { SessionService } from './SessionService.js';
 
 export class SignalingServer {
   private wss: WebSocketServer;
@@ -29,7 +30,7 @@ export class SignalingServer {
       }
 
       const clientId = uuidv4();
-      console.log(`New WebSocket connection: ${clientId} (user: ${session.userId})`);
+      console.log(`New WebSocket connection: ${clientId} (${session.isGuest ? 'guest' : 'user'}: ${session.userId})`);
 
       // create authenticated client object
       const client: Client = {
@@ -39,6 +40,7 @@ export class SignalingServer {
         sessionId: null,
         ws,
         isHost: false, //will be setup by server logic not client
+        isGuest: session.isGuest,
         joinedAt: new Date(),
         lastPing: new Date(),
       };
@@ -48,9 +50,14 @@ export class SignalingServer {
       // send client their id
       this.sendMessage(ws, {
         type: 'session-update',
-        data: { clientId, userId: session.userId, userName: session.name || undefined },
+        data: { clientId, userId: session.userId, userName: session.name || undefined, isGuest: session.isGuest },
         timestamp: Date.now(),
       });
+      
+      // If guest, auto-join the session they were invited to
+      if (session.isGuest && session.inviteToken) {
+        await this.handleGuestAutoJoin(client, session.inviteToken);
+      }
 
       // setup message handler
       ws.on('message', (data: string) => {
@@ -74,6 +81,48 @@ export class SignalingServer {
     });
 
     console.log('WebSocket signaling server initialized');
+  }
+
+  private async handleGuestAutoJoin(client: Client, inviteToken: string): Promise<void> {
+    try {
+      const result = await SessionService.joinAsGuest({
+        inviteToken,
+        clientId: client.id,
+        guestName: client.userName,
+      });
+
+      // add client to in-memory session
+      let session = this.sessionManager.getSession(result.session.id);
+      if (!session) {
+        console.log(`Guest ${client.id} waiting for host to start session ${result.session.id}`);
+        return;
+      }
+
+      this.sessionManager.addClientToSession(session.id, client);
+
+      // notify host that guest joined
+      this.broadcastToSession(
+        session.id,
+        {
+          type: 'peer-joined',
+          sessionId: session.id,
+          from: client.id,
+          data: {
+            clientId: client.id,
+            userId: client.userId,
+            userName: client.userName || 'Guest',
+            isGuest: true,
+          },
+          timestamp: Date.now(),
+        },
+        client.id
+      );
+
+      console.log(`Guest ${client.id} auto-joined session ${session.id}`);
+    } catch (error) {
+      console.error('Guest auto-join failed:', error);
+      this.sendError(client.ws, (error as Error).message);
+    }
   }
 
   private handleMessage(client: Client, data: string): void {
