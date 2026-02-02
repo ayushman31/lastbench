@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { WebSocketServer } from 'ws';
 import cors from 'cors';
 import { SignalingServer } from './SignalingServer.js';
+import sessionsRouter from './routes/sessions.js';
 
 const app = express();
 const PORT = process.env.WS_SERVER_PORT || 4002;
@@ -53,6 +54,8 @@ app.get('/sessions', (_: Request, res: Response) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.use('/api/sessions', sessionsRouter);
 
 server.listen(PORT, () => {
   console.log(`WebSocket signaling server running on port ${PORT}`);
