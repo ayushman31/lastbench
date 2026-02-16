@@ -24,6 +24,29 @@ export class SessionManager {
     return session;
   }
 
+  // create a session with a specific ID (for database sessions)
+  createSessionWithId(sessionId: string, hostId: string, hostName?: string, maxParticipants: number = 10): Session {
+    // check if session already exists
+    if (this.sessions.has(sessionId)) {
+      console.log(`Session ${sessionId} already exists, returning existing session`);
+      return this.sessions.get(sessionId)!;
+    }
+
+    const session: Session = {
+      id: sessionId, // use provided ID instead of generating new one
+      hostId,
+      hostName,
+      participants: new Map(),
+      maxParticipants,
+      createdAt: new Date(),
+    };
+
+    this.sessions.set(sessionId, session);
+
+    console.log(`Session created with ID: ${sessionId} by host ${hostId}`);
+    return session;
+  }
+  
 // get session by id
   getSession(sessionId: string): Session | undefined {
     return this.sessions.get(sessionId);

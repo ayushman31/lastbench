@@ -1,0 +1,1 @@
+{"root":["./src/sessionmanager.ts","./src/sessionservice.ts","./src/signalingserver.ts","./src/auth.ts","./src/index.ts","./src/ratelimiter.ts","./src/types.ts","./src/routes/sessions.ts"],"version":"5.9.2"}

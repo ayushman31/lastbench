@@ -92,35 +92,40 @@ export class SignalingServer {
       });
 
       // add client to in-memory session
-      let session = this.sessionManager.getSession(result.session.id);
-      if (!session) {
-        console.log(`Guest ${client.id} waiting for host to start session ${result.session.id}`);
-        return;
-      }
+      // let session = this.sessionManager.getSession(result.session.id);
+      // if (!session) {
+      //   console.log(`Guest ${client.id} waiting for host to start session ${result.session.id}`);
+      //   return;
+      // }
 
-      this.sessionManager.addClientToSession(session.id, client);
+      // this.sessionManager.addClientToSession(session.id, client);
 
-      // notify host that guest joined
-      this.broadcastToSession(
-        session.id,
-        {
-          type: 'peer-joined',
-          sessionId: session.id,
-          from: client.id,
-          data: {
-            clientId: client.id,
-            userId: client.userId,
-            userName: client.userName || 'Guest',
-            isGuest: true,
-          },
-          timestamp: Date.now(),
-        },
-        client.id
-      );
+      // // notify host that guest joined
+      // this.broadcastToSession(
+      //   session.id,
+      //   {
+      //     type: 'peer-joined',
+      //     sessionId: session.id,
+      //     from: client.id,
+      //     data: {
+      //       clientId: client.id,
+      //       userId: client.userId,
+      //       userName: client.userName || 'Guest',
+      //       isGuest: true,
+      //     },
+      //     timestamp: Date.now(),
+      //   },
+      //   client.id
+      // );
 
-      console.log(`Guest ${client.id} auto-joined session ${session.id}`);
+      // console.log(`Guest ${client.id} auto-joined session ${session.id}`);
+
+      console.log(`Guest ${client.id} validated for session ${result.session.id}, waiting for explicit join`);
+      
+      // NOTE: Guest will join the session later when they send 'join-session' message
+      // This allows them to go through lobby screen first
     } catch (error) {
-      console.error('Guest auto-join failed:', error);
+      console.error('Guest validation failed:', error);
       this.sendError(client.ws, (error as Error).message);
     }
   }
@@ -173,29 +178,67 @@ export class SignalingServer {
   private handleJoinSession(client: Client, data: JoinSessionMessage): void {
     try {
       const { sessionId, isHost } = data;
+      
+      console.log(`[SignalingServer] Client ${client.id} joining session ${sessionId} as ${isHost ? 'host' : 'guest'}`);
 
+      // Check if client is already in this session
+      if (client.sessionId === sessionId) {
+        console.log(`[SignalingServer] Client ${client.id} already in session ${sessionId}`);
+        // Send confirmation again
+        this.sendMessage(client.ws, {
+          type: 'session-update',
+          sessionId: sessionId,
+          data: {
+            joined: true,
+            userId: client.userId,
+            userName: client.userName,
+            sessionId: sessionId,
+            clientId: client.id,
+            isHost: client.isHost,
+          },
+          timestamp: Date.now(),
+        });
+        return;
+      }
 
       let session = this.sessionManager.getSession(sessionId);
       const userIsHost = isHost && !session; // only first person can be host
 
       // create session if host and doesn't exist
       if (userIsHost) {
-        session = this.sessionManager.createSession(client.id, client.userName);
+        session = this.sessionManager.createSessionWithId(sessionId, client.id, client.userName);
+        console.log(`[SignalingServer] Created new in-memory session: ${sessionId}`);
       }
 
       if (!session) {
+        console.error(`[SignalingServer] Session ${sessionId} not found`);
         throw new Error('Session not found');
       }
 
       if (isHost && session.hostId !== client.id) {
+        console.error(`[SignalingServer] Client ${client.id} is not host of session ${sessionId}`);
         throw new Error('You are not the host of this session');
       }
+      
       client.isHost = userIsHost || false;
 
       // add client to session
       this.sessionManager.addClientToSession(session.id, client);
 
-      // notify client of successful join
+      // Get ALL participants INCLUDING the one that just joined
+      const allSessionParticipants = Array.from(session.participants.values())
+        .filter(p => p.id !== client.id) // Exclude the joining client from the list sent to them
+        .map(p => ({
+          clientId: p.id,
+          userId: p.userId,
+          userName: p.userName,
+          isHost: p.isHost || false,
+          isGuest: p.isGuest || false,
+        }));
+
+      console.log(`[SignalingServer] Sending session-update to ${client.id} with ${allSessionParticipants.length} participants:`, allSessionParticipants.map(p => p.userName));
+
+      // notify client of successful join WITH list of existing participants
       this.sendMessage(client.ws, {
         type: 'session-update',
         sessionId: session.id,
@@ -206,6 +249,7 @@ export class SignalingServer {
           sessionId: session.id,
           clientId: client.id,
           isHost: client.isHost,
+          participants: allSessionParticipants, // Include list of existing participants
         },
         timestamp: Date.now(),
       });
@@ -222,6 +266,7 @@ export class SignalingServer {
             userId: client.userId,
             userName: client.userName,
             isHost: client.isHost,
+            isGuest: client.isGuest,
           },
           timestamp: Date.now(),
         },
@@ -229,24 +274,24 @@ export class SignalingServer {
       );
 
       // send existing participants to new client
-      const existingParticipants = this.sessionManager
-        .getSessionClients(session.id)
-        .filter((c: Client) => c.id !== client.id)
-        .map((c: Client) => ({
-          clientId: c.id,
-          userId: c.userId,
-          userName: c.userName,
-          isHost: c.isHost,
-        }));
+      // const existingParticipants = this.sessionManager
+      //   .getSessionClients(session.id)
+      //   .filter((c: Client) => c.id !== client.id)
+      //   .map((c: Client) => ({
+      //     clientId: c.id,
+      //     userId: c.userId,
+      //     userName: c.userName,
+      //     isHost: c.isHost,
+      //   }));
 
-      this.sendMessage(client.ws, {
-        type: 'session-update',
-        sessionId: session.id,
-        data: {
-          participants: existingParticipants,
-        },
-        timestamp: Date.now(),
-      });
+      // this.sendMessage(client.ws, {
+      //   type: 'session-update',
+      //   sessionId: session.id,
+      //   data: {
+      //     participants: existingParticipants,
+      //   },
+      //   timestamp: Date.now(),
+      // });
 
       console.log(`Client ${client.id} joined session ${session.id}`);
     } catch (error) {
@@ -328,6 +373,9 @@ export class SignalingServer {
 
   private sendMessage(ws: WebSocket, message: SignalingMessage): void {
     if (ws.readyState === WebSocket.OPEN) {
+      if (message.type === 'session-update') {
+        console.log('[SignalingServer] Sending message:', JSON.stringify(message, null, 2));
+      }
       ws.send(JSON.stringify(message));
     }
   }
