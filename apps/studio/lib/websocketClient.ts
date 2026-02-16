@@ -183,8 +183,6 @@ export class WebSocketClient {
 
   private handleError(event: Event): void {
     console.error('[WS] Error:', event);
-    const error = new Error('WebSocket error');
-    this.onErrorHandler?.(error);
   }
 
   private handleClose(event: CloseEvent): void {
