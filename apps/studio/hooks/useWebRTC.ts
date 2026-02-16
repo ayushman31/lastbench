@@ -180,10 +180,13 @@ export function useWebRTC(options: UseWebRTCOptions) {
 
   // update local stream tracks
   useEffect(() => {
-    if (!localStream) return;
+    if (!localStream) {
+      return;
+    }
+
 
     // update all peer connections with new tracks
-    peerConnectionsRef.current.forEach((pc, remoteClientId) => {
+    peerConnectionsRef.current.forEach(async (pc, remoteClientId) => {
       // remove old senders
       pc.getSenders().forEach((sender) => {
         pc.removeTrack(sender);
@@ -195,6 +198,28 @@ export function useWebRTC(options: UseWebRTCOptions) {
       });
 
       console.log('[WebRTC] Updated tracks for:', remoteClientId);
+      
+      // CRITICAL: Renegotiate after adding tracks
+      // Create a new offer to inform the remote peer about the new tracks
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        
+        optionsRef.current.onMessage({
+          type: 'offer',
+          to: remoteClientId,
+          data: offer,
+          timestamp: Date.now(),
+        });
+        
+        console.log('[WebRTC] Renegotiated after adding tracks for:', remoteClientId);
+        
+        // #region agent log
+        fetch('http://127.0.0.1:7242/ingest/17e2719f-0303-4a68-9210-85c9d0b52f60',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebRTC.ts:renegotiate',message:'Renegotiated after adding tracks',data:{remoteClientId},timestamp:Date.now(),hypothesisId:'H7'})}).catch(()=>{});
+        // #endregion
+      } catch (error) {
+        console.error('[WebRTC] Error renegotiating:', error);
+      }
     });
   }, [localStream]);
 

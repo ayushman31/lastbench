@@ -4,6 +4,10 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { WebSocketClient } from '@/lib/websocketClient';
 import type { SignalingMessage, Participant } from '@/lib/types';
 
+// Module-level guard to prevent duplicate WebSocket instances across React Strict Mode remounts
+let globalWsClient: WebSocketClient | null = null;
+let globalWsToken: string | undefined = undefined;
+
 interface UseWebSocketOptions {
   token?: string; // for guest authentication
   onParticipantJoined?: (participant: Participant) => void;
@@ -106,11 +110,27 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }
   }, []);
 
-  // initialize WebSocket client
+  // initialize WebSocket client once
   useEffect(() => {
-    const wsUrl = process.env.NEXT_PUBLIC_WS_SERVER_URL || 'ws://localhost:4002/ws';
+    // If there's a global client and the token matches, reuse it
+    if (globalWsClient && globalWsToken === options.token) {
+      console.log('[useWebSocket] Reusing existing global WebSocket client');
+      wsClientRef.current = globalWsClient;
+      setIsConnected(globalWsClient.isConnected);
+      return;
+    }
 
-    console.log('[useWebSocket] Initializing WebSocket client');
+    // If token changed, disconnect old client
+    if (globalWsClient && globalWsToken !== options.token) {
+      console.log('[useWebSocket] Token changed, disconnecting old client');
+      globalWsClient.disconnect();
+      globalWsClient = null;
+      globalWsToken = undefined;
+    }
+
+    // Create new client
+    const wsUrl = process.env.NEXT_PUBLIC_WS_SERVER_URL || 'ws://localhost:4002/ws';
+    console.log('[useWebSocket] Creating new WebSocket client');
 
     const client = new WebSocketClient({
       url: wsUrl,
@@ -125,23 +145,30 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         setIsConnected(false);
       },
       onError: (error) => {
-        console.error('[useWebSocket] Error:', error);
-        optionsRef.current.onError?.(error);
+        // Only show errors that are meaningful to the user
+        if (error.message.includes('Failed to reconnect') || error.message.includes('Max reconnection')) {
+          console.error('[useWebSocket] Error:', error);
+          optionsRef.current.onError?.(error);
+        } else {
+          // Just log generic errors, don't show to user
+          console.warn('[useWebSocket] Minor error (ignored):', error.message);
+        }
       },
       reconnectInterval: 3000,
       maxReconnectAttempts: 10,
     });
 
     wsClientRef.current = client;
+    globalWsClient = client;
+    globalWsToken = options.token;
     client.connect();
 
     // cleanup on unmount
     return () => {
-      console.log('[useWebSocket] Cleaning up');
-      client.disconnect();
-      wsClientRef.current = null;
+      console.log('[useWebSocket] Component unmounting (keeping global client)');
+      // Don't disconnect on unmount - React Strict Mode will remount
     };
-  }, [options.token, handleMessage]);
+  }, [handleMessage, options.token]);
 
   const joinSession = useCallback((sessionId: string, isHost: boolean) => {
     if (wsClientRef.current) {
