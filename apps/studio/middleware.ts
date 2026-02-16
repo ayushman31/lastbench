@@ -3,6 +3,17 @@ import type { NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
 
+  const { pathname, searchParams } = request.nextUrl;
+
+  // allow guest join pages without authentication
+  if (pathname.startsWith('/join/')) {
+    return NextResponse.next();
+  }
+
+  if (pathname === '/recording-room' && searchParams.get('token')) {
+    return NextResponse.next();
+  }
+
   const cookieHeader = request.headers.get('cookie');
 
   // check if session cookie is present
