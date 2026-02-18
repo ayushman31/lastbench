@@ -8,7 +8,7 @@ import { DeviceSelect } from '../DeviceSelect';
 import { Button } from '@/components/ui/button';
 import { Modal } from '@/components/ui/modal';
 import { Input } from '@/components/ui/input';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 interface LobbyScreenProps {
   stream: MediaStream | null;
@@ -43,9 +43,18 @@ export const LobbyScreen = ({
 }: LobbyScreenProps) => {
   const [isMicMuted, setIsMicMuted] = useState<boolean>(false);
   const [isCamOff, setIsCamOff] = useState<boolean>(false);
-  const [guestName, setGuestName] = useState<string>(propGuestName);
-  const [showGuestModal, setShowGuestModal] = useState<boolean>(isGuest && !propGuestName);
+  const [guestName, setGuestName] = useState<string>('');
+  const [showGuestModal, setShowGuestModal] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (propGuestName) {
+      setGuestName(propGuestName);
+      setShowGuestModal(false);
+    } else if (isGuest) {
+      setShowGuestModal(true);
+    }
+  }, [propGuestName, isGuest]);
 
   const handleMicToggle = () => {
     setIsMicMuted(!isMicMuted);
@@ -160,7 +169,7 @@ export const LobbyScreen = ({
           </div>
 
           <Button
-            onClick={onJoin()}
+            onClick={onJoin}
             className="w-full h-12 text-lg shadow-primary/25"
           >
             {isGuest ? 'Join Studio' : 'Create Studio'}

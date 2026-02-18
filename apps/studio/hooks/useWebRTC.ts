@@ -26,6 +26,12 @@ export function useWebRTC(options: UseWebRTCOptions) {
   // store peer connections
   const peerConnectionsRef = useRef<Map<string, RTCPeerConnection>>(new Map());
   const optionsRef = useRef(options);
+  
+  // track which peer connections are currently processing an answer (prevent duplicates)
+  const processingAnswerRef = useRef<Set<string>>(new Set());
+  
+  // track which peer connections are currently processing an offer (prevent duplicates)
+  const processingOfferRef = useRef<Set<string>>(new Set());
 
   // update options ref
   useEffect(() => {
@@ -114,6 +120,22 @@ export function useWebRTC(options: UseWebRTCOptions) {
     try {
       console.log('[WebRTC] Handling offer from:', fromClientId);
 
+      // check if we're already processing an offer from this peer (prevent duplicates from React Strict Mode)
+      if (processingOfferRef.current.has(fromClientId)) {
+        console.log('[WebRTC] Already processing offer from:', fromClientId, '- skipping duplicate');
+        return;
+      }
+
+      // check if we already have a peer connection for this peer
+      const existingPc = peerConnectionsRef.current.get(fromClientId);
+      if (existingPc) {
+        console.log('[WebRTC] Peer connection already exists for:', fromClientId, '- skipping duplicate offer');
+        return;
+      }
+
+      // mark as processing
+      processingOfferRef.current.add(fromClientId);
+
       const pc = createPeerConnection(fromClientId);
       await pc.setRemoteDescription(new RTCSessionDescription(offer));
 
@@ -126,8 +148,13 @@ export function useWebRTC(options: UseWebRTCOptions) {
         data: answer,
         timestamp: Date.now(),
       });
+      
+      // clear processing flag after successful completion
+      processingOfferRef.current.delete(fromClientId);
     } catch (error) {
       console.error('[WebRTC] Error handling offer:', error);
+      // clear processing flag on error
+      processingOfferRef.current.delete(fromClientId);
     }
   }, [createPeerConnection]);
 
@@ -144,9 +171,29 @@ export function useWebRTC(options: UseWebRTCOptions) {
         return;
       }
 
+      // check if we're already processing an answer for this peer (prevent duplicates from React Strict Mode)
+      if (processingAnswerRef.current.has(fromClientId)) {
+        console.log('[WebRTC] Already processing answer for:', fromClientId, '- skipping duplicate');
+        return;
+      }
+
+      // check if we're in the correct state to receive an answer
+      if (pc.signalingState !== 'have-local-offer') {
+        console.warn('[WebRTC] Cannot set answer - wrong signaling state:', pc.signalingState, 'for:', fromClientId);
+        return;
+      }
+
+      // mark as processing
+      processingAnswerRef.current.add(fromClientId);
+
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      
+      // clear processing flag after successful set
+      processingAnswerRef.current.delete(fromClientId);
     } catch (error) {
       console.error('[WebRTC] Error handling answer:', error);
+      // clear processing flag on error
+      processingAnswerRef.current.delete(fromClientId);
     }
   }, []);
 
@@ -184,43 +231,56 @@ export function useWebRTC(options: UseWebRTCOptions) {
       return;
     }
 
+    // // update all peer connections with new tracks
+    // peerConnectionsRef.current.forEach(async (pc, remoteClientId) => {
+    //   // remove old senders
+    //   pc.getSenders().forEach((sender) => {
+    //     pc.removeTrack(sender);
+    //   });
 
-    // update all peer connections with new tracks
-    peerConnectionsRef.current.forEach(async (pc, remoteClientId) => {
-      // remove old senders
-      pc.getSenders().forEach((sender) => {
-        pc.removeTrack(sender);
-      });
+    //   // add new tracks
+    //   localStream.getTracks().forEach((track) => {
+    //     pc.addTrack(track, localStream);
+    //   });
 
-      // add new tracks
-      localStream.getTracks().forEach((track) => {
-        pc.addTrack(track, localStream);
-      });
-
-      console.log('[WebRTC] Updated tracks for:', remoteClientId);
+    //   console.log('[WebRTC] Updated tracks for:', remoteClientId);
       
-      // CRITICAL: Renegotiate after adding tracks
-      // Create a new offer to inform the remote peer about the new tracks
-      try {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
+    //   // CRITICAL: Renegotiate after adding tracks
+    //   // Create a new offer to inform the remote peer about the new tracks
+    //   try {
+    //     const offer = await pc.createOffer();
+    //     await pc.setLocalDescription(offer);
         
-        optionsRef.current.onMessage({
-          type: 'offer',
-          to: remoteClientId,
-          data: offer,
-          timestamp: Date.now(),
-        });
+    //     optionsRef.current.onMessage({
+    //       type: 'offer',
+    //       to: remoteClientId,
+    //       data: offer,
+    //       timestamp: Date.now(),
+    //     });
         
-        console.log('[WebRTC] Renegotiated after adding tracks for:', remoteClientId);
+    //     console.log('[WebRTC] Renegotiated after adding tracks for:', remoteClientId);
         
-        // #region agent log
-        fetch('http://127.0.0.1:7242/ingest/17e2719f-0303-4a68-9210-85c9d0b52f60',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebRTC.ts:renegotiate',message:'Renegotiated after adding tracks',data:{remoteClientId},timestamp:Date.now(),hypothesisId:'H7'})}).catch(()=>{});
-        // #endregion
-      } catch (error) {
-        console.error('[WebRTC] Error renegotiating:', error);
-      }
+    //     // #region agent log
+    //     fetch('http://127.0.0.1:7242/ingest/17e2719f-0303-4a68-9210-85c9d0b52f60',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'useWebRTC.ts:renegotiate',message:'Renegotiated after adding tracks',data:{remoteClientId},timestamp:Date.now(),hypothesisId:'H7'})}).catch(()=>{});
+    //     // #endregion
+    //   } catch (error) {
+    //     console.error('[WebRTC] Error renegotiating:', error);
+    //   }
+    // });
+
+    console.log('[WebRTC] Local stream available, closing old peer connections to restart with tracks');
+    
+    // close all existing peer connections that were created without tracks
+    // we'll recreate them with the proper tracks when offers/answers are exchanged
+    peerConnectionsRef.current.forEach((pc, remoteClientId) => {
+      console.log('[WebRTC] Closing old peer connection for:', remoteClientId);
+      pc.close();
+      peerConnectionsRef.current.delete(remoteClientId);
+      optionsRef.current.onStreamRemoved(remoteClientId);
     });
+    
+    // NOTE: new peer connections will be created when offers/answers are received
+    // and at that point, localStream will be available to add tracks
   }, [localStream]);
 
   // cleanup on unmount

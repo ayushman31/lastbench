@@ -42,12 +42,6 @@ export default function RecordingPage() {
 
   const isGuest = !!urlToken;
   const isHost = !isGuest && !!authSession;
-  
-  // #region agent log
-  useEffect(() => {
-    fetch('http://127.0.0.1:7242/ingest/17e2719f-0303-4a68-9210-85c9d0b52f60',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'page.tsx:MOUNT',message:'Component mounted',data:{urlToken,urlGuestName,isGuest,isHost,hasAuthSession:!!authSession},timestamp:Date.now(),hypothesisId:'B,C'})}).catch(()=>{});
-  }, []);
-  // #endregion
 
   const [appState, setAppStateRaw] = useState<'permissions' | 'lobby' | 'studio'>('permissions');
   
@@ -58,6 +52,7 @@ export default function RecordingPage() {
   const [sessionId, setSessionId] = useState<string | null>(urlSessionId);
   const [inviteLink, setInviteLink] = useState<string>('');
   const [showInviteLinkModal, setShowInviteLinkModal] = useState(false);
+  const [hasCreatedSession, setHasCreatedSession] = useState(false);
   const [guestName, setGuestName] = useState<string>(urlGuestName || '');
   const [guestNameCollected, setGuestNameCollected] = useState<boolean>(!!urlGuestName);
   const [hasJoinedSession, setHasJoinedSession] = useState(false);
@@ -218,8 +213,10 @@ export default function RecordingPage() {
           break;
 
         case 'peer-joined':
-          // When a new peer joins, create an offer if we're already in the session
-          if (message.from && appState === 'studio') {
+          // only host creates offers when a new peer joins
+          // this prevents race conditions where both sides try to create offers
+          if (message.from && appState === 'studio' && isHost) {
+            console.log('[App] Host creating offer for new peer:', message.from);
             setTimeout(() => {
               createOffer(message.from!);
             }, 1000);
@@ -329,6 +326,7 @@ export default function RecordingPage() {
       setSessionId(data.session.id);
       setInviteLink(data.inviteLink);
       setShowInviteLinkModal(true);
+      setHasCreatedSession(true);
 
       console.log('[App] Session created:', data.session.id);
     } catch (error) {
@@ -387,7 +385,11 @@ export default function RecordingPage() {
     }
 
     console.log('[App] Joining session:', sessionId);
-    wsJoinSession(sessionId, isHost);
+    const userName = isGuest 
+      ? guestName 
+      : (authSession?.user?.name || authSession?.user?.email || 'Unknown User');
+    
+    wsJoinSession(sessionId, isHost, userName);
     setHasJoinedSession(true); // Set this FIRST to prevent useEffect retrigger
     setAppState('studio'); // Then change state
   };
@@ -419,10 +421,11 @@ export default function RecordingPage() {
 
   // Auto-proceed to studio after session creation modal is closed
   useEffect(() => {
-    if (!showInviteLinkModal && sessionId && appState === 'lobby' && isHost && !hasJoinedSession) {
+    // only auto-proceed if the host has created a session (not just loaded with sessionId in URL)
+    if (!showInviteLinkModal && sessionId && appState === 'lobby' && isHost && !hasJoinedSession && hasCreatedSession) {
       proceedToStudio();
     }
-  }, [showInviteLinkModal, sessionId, appState, isHost, isConnected, hasJoinedSession]);
+  }, [showInviteLinkModal, sessionId, appState, isHost, isConnected, hasJoinedSession, hasCreatedSession]);
 
   // For guests, join session when they enter studio
   // useEffect(() => {
