@@ -103,10 +103,10 @@ export class WebSocketClient {
     }
   }
 
-  public joinSession(sessionId: string, isHost: boolean = false): void {
+  public joinSession(sessionId: string, isHost: boolean = false, userName?: string): void {
     this.send({
       type: 'join-session',
-      data: { sessionId, isHost },
+      data: { sessionId, isHost, userName },
       timestamp: Date.now(),
     });
   }

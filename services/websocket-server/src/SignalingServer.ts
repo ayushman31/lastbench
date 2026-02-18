@@ -9,7 +9,7 @@ import { SessionService } from './SessionService.js';
 export class SignalingServer {
   private wss: WebSocketServer;
   private sessionManager: SessionManager;
-  private rateLimiter = new RateLimiter({ windowMs: 1000, maxMessages: 10 });
+  private rateLimiter = new RateLimiter({ windowMs: 1000, maxMessages: 50 }); // TODO : test with 10 as well
 
   constructor(wss: WebSocketServer) {
     this.wss = wss;
@@ -177,9 +177,14 @@ export class SignalingServer {
 
   private handleJoinSession(client: Client, data: JoinSessionMessage): void {
     try {
-      const { sessionId, isHost } = data;
+      const { sessionId, isHost, userName } = data;
       
-      console.log(`[SignalingServer] Client ${client.id} joining session ${sessionId} as ${isHost ? 'host' : 'guest'}`);
+      console.log(`[SignalingServer] Client ${client.id} joining session ${sessionId} as ${isHost ? 'host' : 'guest'}, name: ${userName}`);
+
+      // set the client's userName if provided
+      if (userName) {
+        client.userName = userName;
+      }
 
       // Check if client is already in this session
       if (client.sessionId === sessionId) {

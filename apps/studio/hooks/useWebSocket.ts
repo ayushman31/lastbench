@@ -21,7 +21,7 @@ interface UseWebSocketReturn {
   isConnected: boolean;
   clientId: string | null;
   participants: Participant[];
-  joinSession: (sessionId: string, isHost: boolean) => void;
+  joinSession: (sessionId: string, isHost: boolean, userName?: string) => void;
   leaveSession: () => void;
   sendOffer: (to: string, offer: RTCSessionDescriptionInit) => void;
   sendAnswer: (to: string, answer: RTCSessionDescriptionInit) => void;
@@ -170,10 +170,10 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     };
   }, [handleMessage, options.token]);
 
-  const joinSession = useCallback((sessionId: string, isHost: boolean) => {
+  const joinSession = useCallback((sessionId: string, isHost: boolean, userName?: string) => {
     if (wsClientRef.current) {
-      console.log('[useWebSocket] Joining session:', sessionId, 'as', isHost ? 'host' : 'participant');
-      wsClientRef.current.joinSession(sessionId, isHost);
+      console.log('[useWebSocket] Joining session:', sessionId, 'as', isHost ? 'host' : 'participant', 'name:', userName);
+      wsClientRef.current.joinSession(sessionId, isHost, userName);
     }
   }, []);
 

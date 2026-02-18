@@ -55,6 +55,7 @@ export interface ConnectionQuality {
 export interface JoinSessionMessage {
   sessionId: string;
   isHost?: boolean;
+  userName?: string;
 }
 
 export interface WebRTCSignal {
