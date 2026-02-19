@@ -95,7 +95,8 @@ export default function GuestJoinPage() {
               <h2 className="text-lg font-semibold text-foreground mb-2">
                 Unable to Join
               </h2>
-              <p className="text-sm text-muted-foreground">{error}</p>
+              <p className="text-sm text-muted-foreground">Invalid or expired invite link</p>
+              <p className="text-sm text-muted-foreground">Please contact the host if you believe this is an error</p>
             </div>
             <Button
               onClick={() => (window.location.href = 'http://localhost:3000')}

@@ -51,7 +51,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
         // handle existing participants list
         if (message.data?.participants) {
           setParticipants((prev) => {
-            const newParticipants = message.data.participants.map((p: any) => ({
+            const newParticipants = message.data.participants.map((p: Participant) => ({
               clientId: p.clientId,
               userId: p.userId,
               userName: p.userName || 'Unknown',

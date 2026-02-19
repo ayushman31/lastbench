@@ -11,7 +11,23 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { Button } from '../../ui/button';
+import { type RecordingState } from '@repo/recording-engine';
 
+interface StudioControlsProps {
+  recState: RecordingState;
+  recordedUrl: string;
+  isMicMuted: boolean;
+  isCamOff: boolean;
+  toggleMic: () => void;
+  toggleCam: () => void;
+  startRecording: () => void;
+  stopRecording: () => void;
+  pauseRecording: () => void;
+  resumeRecording: () => void;
+  onDiscardRecording: () => void;
+  onLeave: () => void;
+  isGuest: boolean;
+}
 export const StudioControls = ({
   recState,
   recordedUrl,
@@ -26,7 +42,7 @@ export const StudioControls = ({
   onDiscardRecording,
   onLeave,
   isGuest = false,
-}: any) => {
+}: StudioControlsProps) => {
   return (
     <footer className="h-24 flex items-center justify-center px-6 pb-4">
       <div className="flex items-center gap-4 bg-card/80 backdrop-blur-xl border border-white/5 px-6 py-3 rounded-2xl shadow-2xl">

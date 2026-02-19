@@ -16,7 +16,7 @@ export interface SignalingMessage {
   from?: string;
   to?: string;
   sessionId?: string;
-  data?: any;
+  data?: any; // SesionInfo ? or we have to create a new type for the data : SignalingMessageData
   timestamp: number;
 }
 

@@ -3,7 +3,18 @@
 import { Loader2, Settings, Users } from 'lucide-react';
 import { Button } from '../../ui/button';
 import { formatDuration } from '@repo/recording-engine';
+import { type RecordingState } from '@repo/recording-engine';
 
+interface StudioHeaderProps {
+  recState: RecordingState;
+  recordedUrl: string;
+  isUploading: boolean;
+  uploadProgress: number;
+  onSettings: () => void;
+  userName: string;
+  isGuest: boolean;
+  participantCount: number;
+}
 export const StudioHeader = ({
   recState,
   recordedUrl,
@@ -13,7 +24,7 @@ export const StudioHeader = ({
   userName,
   isGuest,
   participantCount,
-}: any) => {
+}: StudioHeaderProps) => {
   return (
     <header className="h-16 px-6 border-b border-border flex items-center justify-between bg-background/80 backdrop-blur-md z-10 relative">
       <div className="flex items-center gap-3">
