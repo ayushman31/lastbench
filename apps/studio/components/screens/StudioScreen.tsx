@@ -29,6 +29,7 @@ interface StudioScreenProps {
   isGuest?: boolean;
   participants?: Participant[];
   userName?: string;
+  isAutoUploaded?: boolean;
 }
 
 export const StudioScreen = (props: StudioScreenProps) => {
@@ -40,8 +41,8 @@ export const StudioScreen = (props: StudioScreenProps) => {
     >
       <StudioHeader 
         {...props} 
-        userName={props.userName}
-        isGuest={props.isGuest}
+        userName={props.userName || ''}
+        isGuest={props.isGuest || false}
         participantCount={props.participants?.length || 0}
       />
       <StudioStage 
@@ -49,7 +50,8 @@ export const StudioScreen = (props: StudioScreenProps) => {
       />
       <StudioControls 
         {...props} 
-        isGuest={props.isGuest}
+        isGuest={props.isGuest || false}
+        isAutoUploaded={props.isAutoUploaded || false}
       />
     </motion.div>
   );

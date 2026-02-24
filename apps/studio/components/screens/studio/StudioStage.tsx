@@ -15,6 +15,7 @@ export const StudioStage = ({
   onUpload,
   isGuest,
   participants = [],
+  isAutoUploaded = false,
 }: {
   stream: MediaStream | null;
   recordedUrl: string;
@@ -24,6 +25,7 @@ export const StudioStage = ({
   onUpload: () => void;
   isGuest?: boolean;
   participants?: Participant[];
+  isAutoUploaded?: boolean;
 }) => {
   const playbackRef = useRef<HTMLVideoElement>(null);
 
@@ -64,14 +66,21 @@ export const StudioStage = ({
                 <Download size={14} className="mr-2" />
                 Download
               </Button>
-              <Button
-                onClick={onUpload}
-                variant="primary"
-                className="h-9 px-3 text-xs"
-              >
-                <UploadCloud size={14} className="mr-2" />
-                Upload
-              </Button>
+              {isAutoUploaded ? (
+                <div className="h-9 px-3 text-xs flex items-center gap-2 bg-green-500/20 text-green-400 border border-green-500/30 rounded-lg">
+                  <UploadCloud size={14} />
+                  <span>Uploaded</span>
+                </div>
+              ) : (
+                <Button
+                  onClick={onUpload}
+                  variant="primary"
+                  className="h-9 px-3 text-xs"
+                >
+                  <UploadCloud size={14} className="mr-2" />
+                  Upload
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -94,7 +103,6 @@ export const StudioStage = ({
   );
 };
 
-// Participant Tile Component
 // Participant Tile Component
 function ParticipantTile({ participant }: { participant: Participant }) {
   const hasVideoTrack = participant.stream && participant.stream.getVideoTracks().length > 0;

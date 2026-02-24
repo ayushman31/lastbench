@@ -27,6 +27,7 @@ interface StudioControlsProps {
   onDiscardRecording: () => void;
   onLeave: () => void;
   isGuest: boolean;
+  isAutoUploaded?: boolean;
 }
 export const StudioControls = ({
   recState,
@@ -42,6 +43,7 @@ export const StudioControls = ({
   onDiscardRecording,
   onLeave,
   isGuest = false,
+  isAutoUploaded = false,
 }: StudioControlsProps) => {
   return (
     <footer className="h-24 flex items-center justify-center px-6 pb-4">
