@@ -95,6 +95,8 @@ export default function RecordingPage() {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
+  const [currentRecordingId, setCurrentRecordingId] = useState<string | null>(null);
+  const [isAutoUploaded, setIsAutoUploaded] = useState(false); // Track if recording was auto-uploaded
 
   const deps: RecorderDeps = {
     recorderRef,
@@ -122,6 +124,8 @@ export default function RecordingPage() {
     participants,
     joinSession: wsJoinSession,
     leaveSession: wsLeaveSession,
+    startRecording: wsStartRecording,
+    stopRecording: wsStopRecording,
     wsClient,
   } = useWebSocket({
     token: urlToken || undefined,
@@ -228,11 +232,52 @@ export default function RecordingPage() {
             closePeerConnection(message.data.clientId);
           }
           break;
+
+        case 'recording-started':
+          if (message.data) {
+            console.log('[App] Recording started:', message.data);
+            const recordingId = message.data.recordingId;
+            const hostUserId = message.data.hostUserId;
+            setCurrentRecordingId(recordingId);
+            
+            handleStart(deps).catch((err) => {
+              console.error('[App] Failed to start recording:', err);
+            });
+          }
+          break;
+
+        case 'recording-stopped':
+          if (message.data) {
+            console.log('[App] Recording stopped:', message.data);
+            const recordingId = message.data.recordingId;
+            const hostUserId = message.data.hostUserId || authSession?.user?.id;
+            const participantName = isGuest ? guestName : (authSession?.user?.name || 'host');
+            setCurrentRecordingId(null);
+            
+            handleStop(deps).then(async (result) => {
+              if (!result) {
+                console.error('[App] No recording result from handleStop');
+                return;
+              }
+              
+              const currentMetadata = recorderRef.current?.getMetadata();
+              
+              if (currentMetadata && result.url) {
+                await uploadRecordingForParticipant(result.url, currentMetadata, recordingId, hostUserId, participantName, deps);
+                setIsAutoUploaded(true);
+              } else {
+                console.error('[App] Cannot upload: missing metadata or url');
+              }
+            }).catch((err) => {
+              console.error('[App] Failed to stop recording:', err);
+            });
+          }
+          break;
       }
     };
 
     wsClient.setMessageHandler(combinedHandler);
-  }, [wsClient, handleOffer, handleAnswer, handleIceCandidate, createOffer, closePeerConnection, appState]);
+  }, [wsClient, handleOffer, handleAnswer, handleIceCandidate, createOffer, closePeerConnection, appState, isHost, deps]);
 
   // Initial permissions check
   useEffect(() => {
@@ -511,6 +556,98 @@ export default function RecordingPage() {
       return allParts;
     }, [clientId, participants, remoteStreams, activeStream, isHost, isGuest, guestName, authSession]);
 
+  // wrapper function for host to start recording for all participants
+  const onStartRecording = async () => {
+    if (!isHost || !sessionId || !authSession?.user?.id) {
+      console.error('[App] Cannot start recording: not host or missing session/user');
+      return;
+    }
+
+    const recordingId = `recording-${sessionId}-${Date.now()}`;
+    const hostUserId = authSession.user.id;
+    
+    console.log('[App] Host starting recording for all participants:', recordingId);
+    
+    // reset auto-upload flag for new recording
+    setIsAutoUploaded(false);
+    
+    // broadcast to all participants (including self) via WebSocket
+    wsStartRecording(sessionId, recordingId, hostUserId);
+  };
+
+  // wrapper function for host to stop recording for all participants
+  const onStopRecording = async () => {
+    if (!isHost || !sessionId || !currentRecordingId || !authSession?.user?.id) {
+      console.error('[App] Cannot stop recording: not host or not recording');
+      return;
+    }
+    
+    const hostUserId = authSession.user.id;
+    console.log('[App] Host stopping recording for all participants:', currentRecordingId);
+    
+    wsStopRecording(sessionId, currentRecordingId, hostUserId);
+  };
+
+  // helper function to upload a participant's recording with correct path
+  const uploadRecordingForParticipant = async (
+    mediaUrl: string,
+    metadata: RecordingMetadata,
+    recordingId: string,
+    hostUserId: string,
+    participantName: string,
+    deps: RecorderDeps
+  ) => {
+    console.log('[App] Uploading recording for participant:', participantName, 'to recording:', recordingId);
+    
+    try {
+      deps.setIsUploading(true);
+      deps.setUploadProgress(0);
+      deps.setError('');
+
+      const blob = await fetch(mediaUrl).then((r) => r.blob());
+      const ext = (metadata.metadata as { mimeType: string }).mimeType.includes('webm') ? 'webm' : 'mp4';
+      
+      // Sanitize participant name for filename
+      const sanitizedName = participantName.replace(/[^a-zA-Z0-9]/g, '_');
+      const filename = `${isGuest ? 'guest' : 'host'}-${sanitizedName}.${ext}`;
+
+      const uploadSession = await deps.uploadClient.initUpload({
+        userId: hostUserId,
+        recordingId: recordingId,
+        filename,
+        mimeType: (metadata.metadata as { mimeType: string }).mimeType,
+        totalSize: blob.size,
+      });
+
+      const CHUNK_SIZE = 5 * 1024 * 1024; // 5MB chunks
+      const totalChunks = Math.ceil(blob.size / CHUNK_SIZE);
+
+      for (let i = 0; i < totalChunks; i++) {
+        const start = i * CHUNK_SIZE;
+        const end = Math.min(start + CHUNK_SIZE, blob.size);
+        const chunk = blob.slice(start, end);
+
+        await deps.uploadClient.uploadChunk({
+          sessionId: uploadSession.sessionId,
+          chunkIndex: i,
+          chunk,
+          totalChunks,
+        });
+
+        deps.setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
+      }
+
+      const result = await deps.uploadClient.completeUpload(uploadSession.sessionId);
+      console.log('[App] Upload complete:', result);
+    
+      deps.setIsUploading(false);
+      deps.setUploadProgress(0);
+    } catch (err) {
+      deps.setError(`Upload failed: ${(err as Error).message}`);
+      deps.setIsUploading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <AnimatePresence mode="wait">
@@ -549,12 +686,12 @@ export default function RecordingPage() {
             toggleCam={() =>
               toggleCam(activeStream, isCamOff, setIsCamOff)
             }
-            startRecording={() => handleStart(deps)}
+            startRecording={onStartRecording}
             pauseRecording={() => handlePause(deps)}
             resumeRecording={() => handleResume(deps)}
-            stopRecording={() => handleStop(deps)}
+            stopRecording={onStopRecording}
             onUpload={() =>
-              metadata && handleUpload(mediaUrl, metadata, deps)
+              !isAutoUploaded && metadata && handleUpload(mediaUrl, metadata, deps)
             }
             onDownload={() =>
               metadata && handleDownload(mediaUrl, metadata)
@@ -567,6 +704,7 @@ export default function RecordingPage() {
             isGuest={isGuest}
             participants={allParticipants}
             userName={isGuest ? guestName : (authSession?.user?.name || authSession?.user?.email || 'You')}
+            isAutoUploaded={isAutoUploaded}
           />
         )}
       </AnimatePresence>

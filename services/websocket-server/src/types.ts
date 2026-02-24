@@ -9,6 +9,10 @@ export type MessageType =
   | 'peer-joined'
   | 'peer-left'
   | 'session-update'
+  | 'start-recording'
+  | 'stop-recording'
+  | 'recording-started'
+  | 'recording-stopped'
   | 'error'
   | 'ping'
   | 'pong';
@@ -105,4 +109,10 @@ export interface JoinAsGuestInput {
   guestName?: string;
   guestEmail?: string;
   clientId: string;
+}
+
+export interface RecordingControlMessage {
+  sessionId: string;
+  recordingId: string;  
+  hostUserId: string; 
 }

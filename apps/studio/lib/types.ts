@@ -7,6 +7,10 @@ export type MessageType =
   | 'peer-joined'
   | 'peer-left'
   | 'session-update'
+  | 'start-recording'
+  | 'stop-recording'
+  | 'recording-started'
+  | 'recording-stopped'
   | 'error'
   | 'ping'
   | 'pong';

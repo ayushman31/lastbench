@@ -162,6 +162,14 @@ export class SignalingServer {
           this.handleWebRTCSignal(client, message as WebRTCSignal);
           break;
 
+        case 'start-recording':
+          this.handleStartRecording(client, message.data);
+          break;
+
+        case 'stop-recording':
+          this.handleStopRecording(client, message.data);
+          break;
+
         case 'ping':
           this.handlePing(client);
           break;
@@ -405,6 +413,68 @@ export class SignalingServer {
         this.sendMessage(client.ws, message);
       }
     });
+  }
+
+  private handleStartRecording(client: Client, data: any): void {
+    if (!client.sessionId) {
+      this.sendError(client.ws, 'Not in a session');
+      return;
+    }
+
+    // Only host can start recording
+    if (!client.isHost) {
+      this.sendError(client.ws, 'Only host can start recording');
+      return;
+    }
+
+    const { recordingId, hostUserId } = data;
+    console.log(`[SignalingServer] Host ${client.id} starting recording: ${recordingId}`);
+
+    // Broadcast to ALL participants in the session (including host)
+    this.broadcastToSession(
+      client.sessionId,
+      {
+        type: 'recording-started',
+        sessionId: client.sessionId,
+        data: {
+          recordingId,
+          hostUserId,
+          sessionId: client.sessionId,
+        },
+        timestamp: Date.now(),
+      }
+    );
+  }
+
+  private handleStopRecording(client: Client, data: any): void {
+    if (!client.sessionId) {
+      this.sendError(client.ws, 'Not in a session');
+      return;
+    }
+
+    // Only host can stop recording
+    if (!client.isHost) {
+      this.sendError(client.ws, 'Only host can stop recording');
+      return;
+    }
+
+    const { recordingId, hostUserId } = data;
+    console.log(`[SignalingServer] Host ${client.id} stopping recording: ${recordingId}`);
+
+    // Broadcast to ALL participants in the session (including host)
+    this.broadcastToSession(
+      client.sessionId,
+      {
+        type: 'recording-stopped',
+        sessionId: client.sessionId,
+        data: {
+          recordingId,
+          hostUserId, // Include hostUserId so guests know where to upload
+          sessionId: client.sessionId,
+        },
+        timestamp: Date.now(),
+      }
+    );
   }
 
   private startCleanupInterval(): void {

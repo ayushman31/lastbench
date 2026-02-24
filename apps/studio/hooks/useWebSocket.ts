@@ -26,6 +26,8 @@ interface UseWebSocketReturn {
   sendOffer: (to: string, offer: RTCSessionDescriptionInit) => void;
   sendAnswer: (to: string, answer: RTCSessionDescriptionInit) => void;
   sendIceCandidate: (to: string, candidate: RTCIceCandidateInit) => void;
+  startRecording: (sessionId: string, recordingId: string, hostUserId: string) => void;
+  stopRecording: (sessionId: string, recordingId: string, hostUserId?: string) => void;
 }
 
 export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketReturn {
@@ -203,6 +205,20 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     }
   }, []);
 
+  const startRecording = useCallback((sessionId: string, recordingId: string, hostUserId: string) => {
+    if (wsClientRef.current) {
+      console.log('[useWebSocket] Starting recording:', recordingId);
+      wsClientRef.current.startRecording(sessionId, recordingId, hostUserId);
+    }
+  }, []);
+
+  const stopRecording = useCallback((sessionId: string, recordingId: string, hostUserId?: string) => {
+    if (wsClientRef.current) {
+      console.log('[useWebSocket] Stopping recording:', recordingId);
+      wsClientRef.current.stopRecording(sessionId, recordingId, hostUserId);
+    }
+  }, []);
+
   return {
     wsClient: wsClientRef.current,
     isConnected,
@@ -213,5 +229,7 @@ export function useWebSocket(options: UseWebSocketOptions = {}): UseWebSocketRet
     sendOffer,
     sendAnswer,
     sendIceCandidate,
+    startRecording,
+    stopRecording,
   };
 }

@@ -118,6 +118,22 @@ export class WebSocketClient {
     });
   }
 
+  public startRecording(sessionId: string, recordingId: string, hostUserId: string): void {
+    this.send({
+      type: 'start-recording',
+      data: { sessionId, recordingId, hostUserId },
+      timestamp: Date.now(),
+    });
+  }
+
+  public stopRecording(sessionId: string, recordingId: string, hostUserId?: string): void {
+    this.send({
+      type: 'stop-recording',
+      data: { sessionId, recordingId, hostUserId },
+      timestamp: Date.now(),
+    });
+  }
+
   public sendOffer(to: string, offer: RTCSessionDescriptionInit): void {
     this.send({
       type: 'offer',

@@ -173,10 +173,10 @@ export const handleResume = (deps: RecorderDeps) => {
   }
 };
 
-export const handleStop = async (deps: RecorderDeps) => {
+export const handleStop = async (deps: RecorderDeps): Promise<{ blob: Blob; url: string } | null> => {
   try {
     const blob = await deps.recorderRef.current?.stop();
-    if (!blob) return;
+    if (!blob) return null;
 
     const url = URL.createObjectURL(blob);
     deps.setMediaUrl(url);
@@ -190,8 +190,11 @@ export const handleStop = async (deps: RecorderDeps) => {
       stream.getTracks().forEach((t) => t.stop());
       deps.previewVideoRef.current.srcObject = null;
     }
+    
+    return { blob, url };
   } catch (err) {
     deps.setError(`Failed to stop: ${(err as Error).message}`);
+    return null;
   }
 };
 
