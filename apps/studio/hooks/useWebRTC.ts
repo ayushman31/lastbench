@@ -32,6 +32,9 @@ export function useWebRTC(options: UseWebRTCOptions) {
   
   // track which peer connections are currently processing an offer (prevent duplicates)
   const processingOfferRef = useRef<Set<string>>(new Set());
+  
+  // track which peer connections are currently creating an offer (prevent duplicates)
+  const creatingOfferRef = useRef<Set<string>>(new Set());
 
   // update options ref
   useEffect(() => {
@@ -39,6 +42,13 @@ export function useWebRTC(options: UseWebRTCOptions) {
   }, [options]);
 
   const createPeerConnection = useCallback((remoteClientId: string): RTCPeerConnection => {
+    // check if peer connection already exists (prevent duplicates from React Strict Mode)
+    const existingPc = peerConnectionsRef.current.get(remoteClientId);
+    if (existingPc) {
+      console.log('[WebRTC] Reusing existing peer connection for:', remoteClientId);
+      return existingPc;
+    }
+    
     console.log('[WebRTC] Creating peer connection for:', remoteClientId);
 
     const pc = new RTCPeerConnection(ICE_SERVERS);
@@ -53,7 +63,6 @@ export function useWebRTC(options: UseWebRTCOptions) {
     // handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate) {
-        console.log('[WebRTC] Sending ICE candidate to:', remoteClientId);
         optionsRef.current.onMessage({
           type: 'ice-candidate',
           to: remoteClientId,
@@ -66,6 +75,7 @@ export function useWebRTC(options: UseWebRTCOptions) {
     // handle remote stream
     pc.ontrack = (event) => {
       console.log('[WebRTC] Received remote track from:', remoteClientId);
+      
       if (event.streams && event.streams[0]) {
         optionsRef.current.onStreamAdded(remoteClientId, event.streams[0]);
       }
@@ -94,7 +104,24 @@ export function useWebRTC(options: UseWebRTCOptions) {
     try {
       console.log('[WebRTC] Creating offer for:', remoteClientId);
       
+      // check if we're already creating an offer for this peer (prevent duplicates from React Strict Mode)
+      if (creatingOfferRef.current.has(remoteClientId)) {
+        console.log('[WebRTC] Already creating offer for:', remoteClientId, '- skipping duplicate');
+        return;
+      }
+      
+      // mark as creating
+      creatingOfferRef.current.add(remoteClientId);
+      
       const pc = createPeerConnection(remoteClientId);
+      
+      // check if PC is in stable state
+      if (pc.signalingState !== 'stable') {
+        console.warn('[WebRTC] Cannot create offer - PC not in stable state:', pc.signalingState, 'for:', remoteClientId);
+        creatingOfferRef.current.delete(remoteClientId);
+        return;
+      }
+      
       const offer = await pc.createOffer({
         offerToReceiveAudio: true,
         offerToReceiveVideo: true,
@@ -108,8 +135,13 @@ export function useWebRTC(options: UseWebRTCOptions) {
         data: offer,
         timestamp: Date.now(),
       });
+      
+      // clear the creating flag after successful completion
+      creatingOfferRef.current.delete(remoteClientId);
     } catch (error) {
       console.error('[WebRTC] Error creating offer:', error);
+      // clear the creating flag on error
+      creatingOfferRef.current.delete(remoteClientId);
     }
   }, [createPeerConnection]);
 
