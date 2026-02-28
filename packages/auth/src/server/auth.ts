@@ -15,7 +15,7 @@ export const auth = betterAuth({
 
     emailAndPassword: {
         enabled: true,
-        requireEmailVerification: false,  //enable later for production
+        requireEmailVerification: true,
         passwordPolicy: {
             minLength: 8,
             maxLength: 20,
@@ -23,6 +23,34 @@ export const auth = betterAuth({
             requireLowercase: true,
             requireNumber: true,
             requireSpecialChar: true,
+        },
+        async sendVerificationOnSignUp(user: typeof auth.$Infer.Session.user, url: string, token: string) {
+            const verificationUrl = `http://localhost:3000/verify-email?token=${token}`;
+            
+            await sendEmail({
+                to: user.email,
+                subject: "Verify your email address",
+                text: `Click the link to verify your email: ${verificationUrl}`,
+                html: `
+                    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                        <h2 style="color: #333;">Welcome to LastBench!</h2>
+                        <p style="color: #666; font-size: 16px;">
+                            Thanks for signing up! Please verify your email address to get started.
+                        </p>
+                        <a href="${verificationUrl}" 
+                           style="display: inline-block; background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 20px 0;">
+                            Verify Email Address
+                        </a>
+                        <p style="color: #999; font-size: 14px; margin-top: 20px;">
+                            If the button doesn't work, copy and paste this link into your browser:<br>
+                            <a href="${verificationUrl}" style="color: #0070f3;">${verificationUrl}</a>
+                        </p>
+                        <p style="color: #999; font-size: 12px; margin-top: 30px;">
+                            If you didn't create an account, you can safely ignore this email.
+                        </p>
+                    </div>
+                `,
+            });
         },
     },
 
@@ -57,12 +85,38 @@ export const auth = betterAuth({
 
     emailVerification: {
         enabled: true,
+        autoSignInAfterVerification: true,  // Auto sign in after email verification
         sendVerificationEmail: async ( { user, url, token }, request) => {
-            void sendEmail({
-                to: user.email,
-                subject: "Verify your email address",
-                text: `Click the link to verify your email: ${url}`,
-            });
+            const verificationUrl = `http://localhost:3000/verify-email?token=${token}`;
+            try {
+                const emailResult = await sendEmail({
+                    to: user.email,
+                    subject: "Verify your email address",
+                    text: `Click the link to verify your email: ${verificationUrl}`,
+                    html: `
+                        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                            <h2 style="color: #333;">Welcome to LastBench!</h2>
+                            <p style="color: #666; font-size: 16px;">
+                                Thanks for signing up! Please verify your email address to get started.
+                            </p>
+                            <a href="${verificationUrl}" 
+                               style="display: inline-block; background-color: #0070f3; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; margin: 20px 0;">
+                                Verify Email Address
+                            </a>
+                            <p style="color: #999; font-size: 14px; margin-top: 20px;">
+                                If the button doesn't work, copy and paste this link into your browser:<br>
+                                <a href="${verificationUrl}" style="color: #0070f3;">${verificationUrl}</a>
+                            </p>
+                            <p style="color: #999; font-size: 12px; margin-top: 30px;">
+                                If you didn't create an account, you can safely ignore this email.
+                            </p>
+                        </div>
+                    `,
+                });
+                
+            } catch (error) {
+                throw new Error("Error in sendVerificationEmail hook");
+            }
         },
     },
     trustedOrigins: [

@@ -1,1 +1,1 @@
-{"root":["./src/types.ts","./src/client/client.ts","./src/client/index.ts","./src/client/usesession.ts","./src/server/auth.ts"],"version":"5.9.3"}
+{"root":["./src/types.ts","./src/client/client.ts","./src/client/index.ts","./src/client/usesession.ts","./src/server/auth.ts","./src/server/email.ts"],"version":"5.9.3"}

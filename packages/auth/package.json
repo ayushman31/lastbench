@@ -24,6 +24,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@getbrevo/brevo": "^4.0.1",
     "better-auth": "^1.4.5",
     "dotenv": "^17.2.3"
   },
