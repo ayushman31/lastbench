@@ -3,6 +3,7 @@ dotenv.config();
 import {betterAuth} from "better-auth";
 import { prisma } from "@repo/db";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { sendEmail } from "./email.js";
 
 
 export const auth = betterAuth({
@@ -53,7 +54,17 @@ export const auth = betterAuth({
             domain: process.env.NODE_ENV === "production" ? ".lastbench.com" : "localhost",
         }
     },
-    
+
+    emailVerification: {
+        enabled: true,
+        sendVerificationEmail: async ( { user, url, token }, request) => {
+            void sendEmail({
+                to: user.email,
+                subject: "Verify your email address",
+                text: `Click the link to verify your email: ${url}`,
+            });
+        },
+    },
     trustedOrigins: [
         "http://localhost:3000",  //apps/web
         "http://localhost:3001",  //apps/studio

@@ -166,7 +166,14 @@ const Menu = () => {
                       label="Logout" 
                       isDanger={false} 
                       variants={menuItemVariants as Variants}
-                      onClick={() => {authClient.signOut(); window.location.href = "http://localhost:3000"}} 
+                      onClick={async() => {await authClient.signOut({
+                        fetchOptions: {
+                          onSuccess: () => {
+                            window.location.href = "http://localhost:3000";
+                          }
+                        }
+                      });
+                    }} 
                     />
                   </motion.div>
                   

@@ -37,6 +37,7 @@ export default function LoginPage() {
       const result = await authClient.signIn.email({
         email,
         password,
+        rememberMe,
         callbackURL: "http://localhost:3001", // Redirect to Studio
       });
 
