@@ -10,6 +10,22 @@ const app = express();
 
 app.use(express.json());
 
+// Add request/response logging middleware for Better Auth routes (for debugging will be removed later)
+app.use("/api/auth", (req, res, next) => {
+  console.log(`[API] ${req.method} ${req.url}`);
+  console.log("[API] Request body:", JSON.stringify(req.body, null, 2));
+  
+  // Capture the original res.json to log responses
+  const originalJson = res.json.bind(res);
+  res.json = function(data: any) {
+    console.log("[API] Response status:", res.statusCode);
+    console.log("[API] Response body:", JSON.stringify(data, null, 2));
+    return originalJson(data);
+  };
+  
+  next();
+});
+
 app.use(cors({
   origin: [
     "http://localhost:3000",  //apps/web
