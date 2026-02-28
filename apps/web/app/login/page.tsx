@@ -1,11 +1,11 @@
 "use client";
 
 import { authClient } from "@repo/auth/client";
-import { useState } from "react";
+import { useState, JSX } from "react";
 import { Mail, Lock, CheckSquare, Square, Loader2 } from "lucide-react";
 import { AuthLayout, InputField, SocialButton } from "../../components/AuthLayout";
 
-export default function LoginPage() {
+export default function LoginPage() : JSX.Element {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -42,7 +42,18 @@ export default function LoginPage() {
       });
 
       if (result.error) {
-        setError(result.error.message || "Failed to sign up");
+        const errorMessage = result.error.message || "Failed to sign in";
+        
+        // Check if it's an email verification error
+        if (errorMessage.toLowerCase().includes("email") && 
+            (errorMessage.toLowerCase().includes("verify") || 
+             errorMessage.toLowerCase().includes("verified"))) {
+          setError(
+            "Your email is not verified. Please check your inbox or resend verification email"
+          );
+        } else {
+          setError(errorMessage);
+        }
       } else {
         // Redirect to Studio on success
         window.location.href = "http://localhost:3001";
