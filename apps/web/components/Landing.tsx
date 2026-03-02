@@ -3,10 +3,11 @@ import localFont from 'next/font/local';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { GetStartedButton } from './ui/button';
+import { JSX } from "react";
 
 const aperture = localFont({src: '../public/fonts/aperture2.0-webfont.woff2'});
 
-const Landing = () => {
+const Landing  = () : JSX.Element => {
     const router = useRouter();
     return (
         <div className='items-center justify-center'>
@@ -25,9 +26,7 @@ const Landing = () => {
                 onClick={() => router.push("/signup")}>Get Started</GetStartedButton>
             </div>
 
-            {/* Left half - crops to show only left 50% */}
             <div className="absolute inset-0 flex">
-                {/* Left half */}
                 <div className="relative w-1/2">
                   <Image
                     src="/landing.png"
@@ -43,7 +42,6 @@ const Landing = () => {
                   />
                 </div>
 
-                {/* Right half */}
                 <div className="relative w-1/2">
                   <Image
                     src="/landing.png"
