@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Plus, Filter } from 'lucide-react';
+import Link from 'next/link';
 
 export const DashboardControlBar: React.FC = () => (
   <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
@@ -27,7 +28,9 @@ export const DashboardControlBar: React.FC = () => (
       </div>
       <button className="flex items-center gap-2 bg-primary hover:bg-primary/80 text-primary-foreground text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-[0_0_15px_oklch(0.4365_0.1044_156.7556_/_0.4)]">
         <Plus size={16} />
+        <Link href="/recording-room">
         <span>Create New</span>
+        </Link>
       </button>
     </div>
   </div>
