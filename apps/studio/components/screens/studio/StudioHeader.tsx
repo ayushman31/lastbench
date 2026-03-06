@@ -14,6 +14,7 @@ interface StudioHeaderProps {
   userName: string;
   isGuest: boolean;
   participantCount: number;
+  hostName?: string;
 }
 export const StudioHeader = ({
   recState,
@@ -24,6 +25,7 @@ export const StudioHeader = ({
   userName,
   isGuest,
   participantCount,
+  hostName
 }: StudioHeaderProps) => {
   return (
     <header className="h-16 px-6 border-b border-border flex items-center justify-between bg-background/80 backdrop-blur-md z-10 relative">
@@ -33,7 +35,7 @@ export const StudioHeader = ({
         </div>
         <div className="flex items-center gap-2">
           <span className="font-medium">
-            {userName ? `${userName}'s Studio` : 'Studio'}
+            {isGuest? `${hostName}'s Studio` : userName ? `${userName}'s Studio` : 'Studio'}
           </span>
           {!isGuest && (
             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">

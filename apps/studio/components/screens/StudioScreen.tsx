@@ -30,6 +30,7 @@ interface StudioScreenProps {
   participants?: Participant[];
   userName?: string;
   isAutoUploaded?: boolean;
+  hostName?: string;
 }
 
 export const StudioScreen = (props: StudioScreenProps) => {
@@ -42,6 +43,7 @@ export const StudioScreen = (props: StudioScreenProps) => {
       <StudioHeader 
         {...props} 
         userName={props.userName || ''}
+        hostName={props.hostName}
         isGuest={props.isGuest || false}
         participantCount={props.participants?.length || 0}
       />

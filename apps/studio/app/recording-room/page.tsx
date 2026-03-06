@@ -54,7 +54,7 @@ export default function RecordingPage() {
   const [showInviteLinkModal, setShowInviteLinkModal] = useState(false);
   const [hasCreatedSession, setHasCreatedSession] = useState(false);
   const [guestName, setGuestName] = useState<string>(urlGuestName || '');
-  const [guestNameCollected, setGuestNameCollected] = useState<boolean>(!!urlGuestName);
+  const [hostName, setHostName] = useState<string>("");
   const [hasJoinedSession, setHasJoinedSession] = useState(false);
   const hasCheckedPermissionsRef = useRef(false);
 
@@ -453,6 +453,7 @@ export default function RecordingPage() {
             
             const data = await response.json();
             setSessionId(data.id);
+            setHostName(data.hostName);
             console.log('[App] Guest session ID fetched:', data.id);
           } catch (error) {
             console.error('[App] Failed to fetch guest session:', error);
@@ -482,7 +483,6 @@ export default function RecordingPage() {
 
   const handleGuestNameSubmit = (name: string) => {
     setGuestName(name);
-    setGuestNameCollected(true);
     console.log('[App] Guest name submitted:', name);
   };
 
@@ -705,6 +705,7 @@ export default function RecordingPage() {
             participants={allParticipants}
             userName={isGuest ? guestName : (authSession?.user?.name || authSession?.user?.email || 'You')}
             isAutoUploaded={isAutoUploaded}
+            hostName= {hostName}
           />
         )}
       </AnimatePresence>
