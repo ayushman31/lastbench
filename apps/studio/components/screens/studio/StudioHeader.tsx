@@ -75,18 +75,20 @@ export const StudioHeader = ({
       </div>
 
       {/* Right */}
-      {isUploading ? (
+      {isUploading && (
         <div className="flex items-center gap-3 text-sm">
           <Loader2 className="animate-spin text-primary" size={16} />
           <span className="text-muted-foreground">
             Uploading {uploadProgress}%
           </span>
         </div>
-      ) : (
-        <Button variant="ghost" size="sm" onClick={onSettings}>
-          <Settings size={18} />
-        </Button>
-      )}
+      ) 
+      // : (
+      //   <Button variant="ghost" size="sm" onClick={onSettings}>
+      //     <Settings size={18} />
+      //   </Button>
+      // )
+      }
     </header>
   );
 };
