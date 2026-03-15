@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState, JSX } from "react";
+import { useEffect, useState, JSX, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { authClient } from "@repo/auth/client";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
-export default function VerifyEmailPage() : JSX.Element {
+function VerifyEmailPage() : JSX.Element {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
@@ -94,5 +94,15 @@ export default function VerifyEmailPage() : JSX.Element {
         )}
       </div>
     </div>
+  );
+}
+
+// TODO : add a better fallback
+
+export default function VerifyEmailPageWrapper(): JSX.Element {
+  return (
+    <Suspense fallback={<Loader2 className="mx-auto h-16 w-16 text-primary animate-spin mb-4" />}> 
+      <VerifyEmailPage />
+    </Suspense>
   );
 }
