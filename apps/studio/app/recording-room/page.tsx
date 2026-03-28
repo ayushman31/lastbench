@@ -637,7 +637,7 @@ export default function RecordingPage() {
         deps.setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
       }
 
-      const result = await deps.uploadClient.completeUpload(uploadSession.sessionId);
+      const result = await deps.uploadClient.completeUpload(uploadSession.sessionId, hostUserId);
       console.log('[App] Upload complete:', result);
     
       deps.setIsUploading(false);

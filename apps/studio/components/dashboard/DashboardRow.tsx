@@ -48,11 +48,11 @@ export const DashboardRow: React.FC<DashboardRowProps> = ({ item }) => {
       </div>
 
 
-      <div className="col-span-2 text-right">
+      {/* <div className="col-span-2 text-right">
         <span className="text-sm text-muted-foreground">
           {item.lastEdited}
         </span>
-      </div>
+      </div> */}
     </motion.div>
   );
 };

@@ -3,6 +3,7 @@ import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import uploadRoutes from './routes/upload';
 import { UploadSessionDB } from './database';
+import trackRoutes from './routes/db';
 
 const app = express();
 const PORT = process.env.UPLOAD_SERVICE_PORT || 4001;
@@ -11,6 +12,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use('/api/upload', uploadRoutes);
+app.use('/api/tracks', trackRoutes);
 
 app.get('/health', ( _,res: Response) => {
   res.json({ status: 'ok', service: 'upload-service' });

@@ -68,3 +68,18 @@ export interface UploadSession {
     statusCode: number;
   }
   
+  export interface UploadTrack {
+    id: string;
+    recordingId: string | null;
+    trackUrl: string;
+    trackType: string;
+    userId: string;
+    createdAt: Date;
+  }
+
+  export interface UploadTrackRequest {
+    recordingId: string | null;
+    trackUrl: string;
+    trackType: string;
+    userId: string;
+  }

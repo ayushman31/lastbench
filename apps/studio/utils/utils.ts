@@ -198,6 +198,8 @@ export const handleStop = async (deps: RecorderDeps): Promise<{ blob: Blob; url:
   }
 };
 
+
+// TODO : check whether this function is being used or not. if not, then remove it
 export const handleUpload = async (
   mediaUrl: string,
   metadata: RecordingMetadata,
@@ -244,7 +246,8 @@ export const handleUpload = async (
       deps.setUploadProgress( Math.round(((i + 1) / totalChunks) * 100));
     }
 
-    await deps.uploadClient.completeUpload(sessionId);
+    // TODO : this user-123 is a placeholder. we need to get the user id from the auth session
+    await deps.uploadClient.completeUpload(sessionId, 'user-123');
     alert('Upload successful');
   } catch (err) {
     deps.setError(`Upload failed: ${(err as Error).message}`);

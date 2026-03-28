@@ -89,30 +89,32 @@ model Project {
   @@map("Project")
 }
 
+// TODO : we have made the projectId optional because for now we are not going to have a projectId for the recording. but later we will need it.( we are just doing this to make this work for now)
 model Recording {
   id         String   @id @default(cuid())
-  projectId  String
+  projectId  String?
   title      String
   duration   Int?
   status     String   @default("processing")
   storageUrl String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-  project    Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  project    Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
   tracks     Track[]
 
   @@index([projectId])
   @@map("Recording")
 }
 
+// TODO : we have made the recordingId optional because for now we are not going to have a recordingId for the track. but later we will need it.( we are just doing this to make this work for now)
 model Track {
   id          String    @id @default(cuid())
-  recordingId String
+  recordingId String?
   userId      String?
   trackUrl    String
   trackType   String
   createdAt   DateTime  @default(now())
-  recording   Recording @relation(fields: [recordingId], references: [id], onDelete: Cascade)
+  recording   Recording? @relation(fields: [recordingId], references: [id], onDelete: Cascade)
 
   @@index([recordingId])
   @@map("Track")

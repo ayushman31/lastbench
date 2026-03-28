@@ -110,7 +110,7 @@ const Dashboard: React.FC = () => {
             <div className="col-span-4">Description</div>
             <div className="col-span-1">Status</div>
             <div className="col-span-2 text-center">Created At</div>
-            <div className="col-span-2 text-right">Last Edited</div>
+            {/* <div className="col-span-2 text-right">Last Edited</div> */}
           </div>
 
           {/* rows */}

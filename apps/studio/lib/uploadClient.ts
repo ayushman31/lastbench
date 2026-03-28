@@ -43,15 +43,39 @@ export class UploadClient {
       return res.json();
     }
   
-    async completeUpload(sessionId: string) {
-      const res = await fetch(`${this.baseUrl}/api/upload/complete`, {
+    async completeUpload(sessionId: string , userId: string) {
+      const resS3Upload = await fetch(`${this.baseUrl}/api/upload/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       });
+ 
+      if (!resS3Upload.ok) throw new Error('Failed to complete S3 upload');
+      const s3UploadData = await resS3Upload.json();
+      console.log('s3UploadData', s3UploadData);
+
+      const resDBTrackUpload= await fetch(`${this.baseUrl}/api/tracks`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          // TODO : this recordingId is a foreign key to the recording table. so we need to generate a unique recordingId and save it to the database
+          recordingId: null as null,
+          trackUrl: s3UploadData.url,
+          trackType: 'video',
+          userId: userId,
+        }),
+      });
+      console.log('resDBTrackUpload', resDBTrackUpload);
+
+      if (!resDBTrackUpload.ok) throw new Error('Failed to upload track to database');
+
+      const dbTrackUploadData = await resDBTrackUpload.json();
   
-      if (!res.ok) throw new Error('Failed to complete upload');
-      return res.json();
+      
+      return {
+        s3UploadUrl: s3UploadData,
+        dbTrackUpload: dbTrackUploadData,
+      };
     }
   }
   
