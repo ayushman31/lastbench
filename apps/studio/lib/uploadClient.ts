@@ -43,7 +43,7 @@ export class UploadClient {
       return res.json();
     }
   
-    async completeUpload(sessionId: string , userId: string) {
+    async completeUpload(sessionId: string , userId: string, title:string, duration:number ) {
       const resS3Upload = await fetch(`${this.baseUrl}/api/upload/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,27 +54,33 @@ export class UploadClient {
       const s3UploadData = await resS3Upload.json();
       console.log('s3UploadData', s3UploadData);
 
-      const resDBTrackUpload= await fetch(`${this.baseUrl}/api/tracks`, {
+      const trackUrl = s3UploadData.url;
+      const recordingUrl = trackUrl.substring(0, trackUrl.lastIndexOf("/")+1); // +1 to include the /
+
+      const resDBTrackRecordingUpload= await fetch(`${this.baseUrl}/api/db`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          // TODO : this recordingId is a foreign key to the recording table. so we need to generate a unique recordingId and save it to the database
-          recordingId: null as null,
-          trackUrl: s3UploadData.url,
+          title: title || 'Untitled Recording',
+          duration,
+          status: 'uploaded',
+          storageUrl: recordingUrl,
+          trackUrl: trackUrl,
           trackType: 'video',
           userId: userId,
+          projectId: null,
         }),
       });
-      console.log('resDBTrackUpload', resDBTrackUpload);
+      console.log('resDBTrackRecordingUpload', resDBTrackRecordingUpload);
 
-      if (!resDBTrackUpload.ok) throw new Error('Failed to upload track to database');
+      if (!resDBTrackRecordingUpload.ok) throw new Error('Failed to upload track and recording to database');
 
-      const dbTrackUploadData = await resDBTrackUpload.json();
+      const dbTrackRecordingUploadData = await resDBTrackRecordingUpload.json();
   
       
       return {
         s3UploadUrl: s3UploadData,
-        dbTrackUpload: dbTrackUploadData,
+        dbTrackRecordingUpload: dbTrackRecordingUploadData,
       };
     }
   }

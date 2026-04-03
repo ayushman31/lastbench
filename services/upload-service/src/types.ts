@@ -68,6 +68,8 @@ export interface UploadSession {
     statusCode: number;
   }
   
+
+  // track types
   export interface UploadTrack {
     id: string;
     recordingId: string | null;
@@ -82,4 +84,37 @@ export interface UploadSession {
     trackUrl: string;
     trackType: string;
     userId: string;
+  }
+
+  // recording types
+  export interface UploadRecording {
+    id: string;
+    projectId: string | null;
+    title: string;
+    duration: number;
+    storageUrl: string;
+    status: string;
+    createdAt: Date;
+    updatedAt: Date;
+    tracks: UploadTrack[];
+  }
+
+  export interface UploadRecordingRequest {
+    projectId: string | null;
+    title: string;
+    duration: number;
+    status: string;
+    storageUrl: string;
+  }
+
+  export interface UploadTrackRecordingRequest {
+    recordingId: string;
+    trackUrl: string;
+    trackType: string;
+    userId: string;
+    projectId: string | null;
+    title: string;
+    duration: number;
+    status: string;
+    storageUrl: string;
   }
