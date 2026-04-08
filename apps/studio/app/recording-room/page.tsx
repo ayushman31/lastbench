@@ -55,6 +55,14 @@ export default function RecordingPage() {
   const [hasCreatedSession, setHasCreatedSession] = useState(false);
   const [guestName, setGuestName] = useState<string>(urlGuestName || '');
   const [hostName, setHostName] = useState<string>("");
+  const hostNameRef = useRef<string>("");  // Ref to avoid closure issues in WebSocket handlers
+  
+  // Helper to update both state and ref together
+  const updateHostName = useCallback((name: string) => {
+    setHostName(name);
+    hostNameRef.current = name;
+  }, []);
+  
   const [hasJoinedSession, setHasJoinedSession] = useState(false);
   const hasCheckedPermissionsRef = useRef(false);
 
@@ -263,7 +271,9 @@ export default function RecordingPage() {
               const currentMetadata = recorderRef.current?.getMetadata();
               
               if (currentMetadata && result.url) {
-                await uploadRecordingForParticipant(result.url, currentMetadata, recordingId, hostUserId, participantName, deps);
+                const hostName = hostNameRef.current;
+                
+                await uploadRecordingForParticipant(result.url, currentMetadata, recordingId, hostUserId, participantName, deps, hostName);
                 setIsAutoUploaded(true);
               } else {
                 console.error('[App] Cannot upload: missing metadata or url');
@@ -372,6 +382,9 @@ export default function RecordingPage() {
       setInviteLink(data.inviteLink);
       setShowInviteLinkModal(true);
       setHasCreatedSession(true);
+      
+      const computedHostName = authSession?.user?.name || authSession?.user?.email || 'Anonymous';
+      updateHostName(computedHostName);  // Update both state and ref
 
       console.log('[App] Session created:', data.session.id);
     } catch (error) {
@@ -453,7 +466,8 @@ export default function RecordingPage() {
             
             const data = await response.json();
             setSessionId(data.id);
-            setHostName(data.hostName);
+            updateHostName(data.hostName);  // Update both state and ref
+          
             console.log('[App] Guest session ID fetched:', data.id);
           } catch (error) {
             console.error('[App] Failed to fetch guest session:', error);
@@ -595,7 +609,8 @@ export default function RecordingPage() {
     recordingId: string,
     hostUserId: string,
     participantName: string,
-    deps: RecorderDeps
+    deps: RecorderDeps,
+    hostName: string
   ) => {
     console.log('[App] Uploading recording for participant:', participantName, 'to recording:', recordingId);
     
@@ -637,7 +652,8 @@ export default function RecordingPage() {
         deps.setUploadProgress(Math.round(((i + 1) / totalChunks) * 100));
       }
 
-      const result = await deps.uploadClient.completeUpload(uploadSession.sessionId, hostUserId, `${hostName}'s Recording`, metadata.duration );
+      const titleString = `${hostName}'s Recording`;
+      const result = await deps.uploadClient.completeUpload(uploadSession.sessionId, hostUserId, titleString, metadata.duration);
       console.log('[App] Upload complete:', result);
     
       deps.setIsUploading(false);
