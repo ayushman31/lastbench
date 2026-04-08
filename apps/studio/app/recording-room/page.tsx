@@ -55,9 +55,9 @@ export default function RecordingPage() {
   const [hasCreatedSession, setHasCreatedSession] = useState(false);
   const [guestName, setGuestName] = useState<string>(urlGuestName || '');
   const [hostName, setHostName] = useState<string>("");
-  const hostNameRef = useRef<string>("");  // Ref to avoid closure issues in WebSocket handlers
+  const hostNameRef = useRef<string>("");  // ref to avoid closure issues in WebSocket handlers
   
-  // Helper to update both state and ref together
+  // helper to update both state and ref together
   const updateHostName = useCallback((name: string) => {
     setHostName(name);
     hostNameRef.current = name;
@@ -382,10 +382,9 @@ export default function RecordingPage() {
       setInviteLink(data.inviteLink);
       setShowInviteLinkModal(true);
       setHasCreatedSession(true);
-      
+
       const computedHostName = authSession?.user?.name || authSession?.user?.email || 'Anonymous';
       updateHostName(computedHostName);  // Update both state and ref
-
       console.log('[App] Session created:', data.session.id);
     } catch (error) {
       console.error('[App] Failed to create session:', error);
