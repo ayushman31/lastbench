@@ -23,7 +23,7 @@ const Menu = () => {
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const { session, loading, user } = useSession();
+  const { user } = useSession();
 
   // close menu when clicking outside
   useEffect(() => {
